@@ -1,26 +1,11 @@
 /*
-REQUERIMIENTOS:
-    1) Indicar en el error Léxico o sintáctico, el número de línea y caracter [DONE]
-    2) En el log colocar el nombre del archivo a compilar, la fecha y la hora [DONE]
-    3)  Agregar el resto de asignaciones [DONE]
-            Asignacion -> 
-            Id = Expresion
-            Id++
-            Id--
-            Id IncrementoTermino Expresion
-            Id IncrementoFactor Expresion
-            Id = Console.Read()
-            Id = Console.ReadLine()
-    4) Emular el Console.Write() & Console.WriteLine() [DONE] 
-    5) Emular el Console.Read() & Console.ReadLine() [DONE]
 
-NUEVOS REQUERIMIENTOS:
-    1) Concatenación [DONE]
-    2) Inicializar una variable desde la declaración [DONE]
-    3) Evaluar las expresiones matemáticas [DONE]
-    4) Levantar una excepción si en el Console.(Read | ReadLine) no ingresan números [DONE]
-    5) Modificar la variable con el resto de operadores (Incremento de factor y termino) [DONE]
-    6) Implementar el else [DONE]
+REQUERIMIENTOS:
+
+1) En la clase token, implementar set y get
+2) Implementar parámetros por default en el constructor léxico. Investigar cómo implementar un constructor 
+    que haga lo mismo que los dos. Investigar parámetros por default
+
 */
 
 using System;
@@ -30,7 +15,7 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Sintaxis_1
+namespace Semantica
 {
     public class Lenguaje : Sintaxis
     {

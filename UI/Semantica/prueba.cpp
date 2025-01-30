@@ -16,19 +16,19 @@ static void Main(string[] args)
 
   int n = 5;
 
-  for(b = 100; a < n; a++) {
+ /*for(b = 100; a < n; a++) {
     b++;
-    while( b != 5 ) {
+    while(b != 5) {
       if(n == 5) {
         aux = 5;
-        Console.WriteLine("" + aux + " es igual a " + n + " " + a + " " + b);
+        Console.WriteLine("" + aux + " es igual a " + b);
       } else {
         aux = 5;
         Console.WriteLine("" + aux + " es diferente a " + n);
       }
     }
-  }
-  if(a % 2 != 0) {
+  }*/
+  if(b % 2 != 0) {
     Console.WriteLine("Es impar " + a);
     if(b == 2) {
       aux = 2;

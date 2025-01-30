@@ -17,9 +17,9 @@ static void Main(string[] args)
 
   for(b = 100; a < n; a++) {
     b++;
-    while( b != 5 ) {
+    while(b != 5) {
       if(n == 5) {
-        Console.WriteLine("5 es igual a " + n + " " + a + " " + b );
+        Console.WriteLine("5 es igual a " + n + " " + a + " " + b);
       } else {
         Console.WriteLine("5 es diferente a " + n);
       }

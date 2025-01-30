@@ -10,7 +10,7 @@ using System.Data.Common;
 using System.IO.Compression;
 using Microsoft.VisualBasic;
 
-namespace Sintaxis_1
+namespace Semantica
 {
     public class Lexico : Token, IDisposable
     {
