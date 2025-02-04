@@ -1,9 +1,5 @@
 Archivo: prueba.cpp
-Fecha y hora: 30/01/2025 12:47:02
+Fecha y hora: 03/02/2025 21:31:56
 ----------------------------------
 Constructor lenguaje
-Lista de variables: 
-aux Int 2
-b Int 5
-a Int 106
-n Int 5
+Error: Sintaxis. Se espera un static en la linea [52] en la columna [3]

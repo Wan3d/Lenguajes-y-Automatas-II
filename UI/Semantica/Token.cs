@@ -1,7 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Semantica
 {
@@ -16,28 +13,21 @@ namespace Semantica
             OperadorRelacional, OperadorLogico, Moneda,
             Cadena, TipoDato, PalabraReservada
         }
-        private string contenido;
-        private Tipos clasificacion;
+
+        private string Contenido { get; set; }
+        private Tipos Clasificacion { get; set; }
+
         public Token()
         {
-            contenido = "";
-            clasificacion = Tipos.Identificador;
+            Contenido = "";
+            Clasificacion = Tipos.Identificador;
         }
-        public void setContenido(string contenido)
-        {
-            this.contenido = contenido;
-        }
-        public void setClasificacion(Tipos clasificacion)
-        {
-            this.clasificacion = clasificacion;
-        }
-        public string getContenido()
-        {
-            return this.contenido;
-        }
-        public Tipos getClasificacion()
-        {
-            return this.clasificacion;
-        }
+        public void setContenido(string contenido) => Contenido = contenido; // Se asigna el valor contenido a la propiedad Contenido
+
+        public string getContenido() => Contenido; // Simplemente devuelve el valor actual de la propiedad Contenido
+
+        public void setClasificacion(Tipos clasificacion) => Clasificacion = clasificacion;
+
+        public Tipos getClasificacion() => Clasificacion;
     }
 }

@@ -1,4 +1,8 @@
-using System;
+int h = Console.ReadLine();
+char e = 252;
+
+
+/*using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -28,7 +32,7 @@ static void Main(string[] args)
       }
     }
   }*/
-  if(b % 2 != 0) {
+ /* if(b % 2 != 0) {
     Console.WriteLine("Es impar " + a);
     if(b == 2) {
       aux = 2;
@@ -45,3 +49,4 @@ static void Main(string[] args)
     Console.WriteLine("Es impar");
   }
 }
+*/
