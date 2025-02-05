@@ -2,9 +2,10 @@
 
 REQUERIMIENTOS:
 
-1) En la clase token, implementar set y get
+1) En la clase token, implementar set y get [DONE]
 2) Implementar parámetros por default en el constructor léxico. Investigar cómo implementar un constructor 
     que haga lo mismo que los dos. Investigar parámetros por default
+3) Implementar línea y columna en los errores semánticos
 
 */
 
@@ -21,17 +22,21 @@ namespace Semantica
     {
         Stack<float> s;
         List<Variable> l;
+
+        Variable.TipoDato maximoTipo;
         public Lenguaje() : base()
         {
             s = new Stack<float>();
             l = new List<Variable>();
             log.WriteLine("Constructor lenguaje");
+            maximoTipo = Variable.TipoDato.Char;
         }
         public Lenguaje(string nombre) : base(nombre)
         {
             s = new Stack<float>();
             l = new List<Variable>();
             log.WriteLine("Constructor lenguaje");
+            maximoTipo = Variable.TipoDato.Char;
         }
 
         private void displayStack()
@@ -113,7 +118,8 @@ namespace Semantica
             {
                 throw new Error($"La variable {getContenido()} ya existe", log, linea, columna);
             }
-            l.Add(new Variable(t, getContenido()));
+            Variable v = new Variable(t, getContenido());
+            l.Add(v);
             match(Tipos.Identificador);
             if (getContenido() == "=")
             {
@@ -126,7 +132,7 @@ namespace Semantica
                     {
                         match("Read");
                         int r = Console.Read();
-                        l.Last().setValor(r); // Asignamos el último valor leído a la última variable detectada
+                        v.setValor(r);
                     }
                     else
                     {
@@ -134,7 +140,7 @@ namespace Semantica
                         string? r = Console.ReadLine();
                         if (float.TryParse(r, out float valor))
                         {
-                            l.Last().setValor(valor);
+                            v.setValor(valor);
                         }
                         else
                         {
@@ -229,6 +235,8 @@ namespace Semantica
         */
         private void Asignacion()
         {
+            // Se iniciliaza cada vez que hagamos una expresión matemática
+            maximoTipo = Variable.TipoDato.Char;
             float r;
             Variable? v = l.Find(variable => variable.getNombre() == getContenido());
             if (v == null)
@@ -334,10 +342,12 @@ namespace Semantica
         //Condicion -> Expresion operadorRelacional Expresion
         private bool Condicion()
         {
+            maximoTipo = Variable.TipoDato.Char;
             Expresion();
             float valor1 = s.Pop();
             string operador = getContenido();
             match(Tipos.OperadorRelacional);
+            maximoTipo = Variable.TipoDato.Char;
             Expresion();
             float valor2 = s.Pop();
             switch (operador)
@@ -544,6 +554,7 @@ namespace Semantica
         {
             if (getClasificacion() == Tipos.Numero)
             {
+                Variable.valorToTipoDato(float.Parse(getContenido()));
                 s.Push(float.Parse(getContenido()));
                 //Console.Write(getContenido() + " ");
                 match(Tipos.Numero);
@@ -567,6 +578,6 @@ namespace Semantica
             }
         }
         /*SNT = Producciones = Invocar el metodo
-        ST  = Tokens (Contenido | Classification) = Invocar match    Variables -> tipo_dato Lista_identificadores; Variables?*/
+        ST  = Tokens (Contenido | Classification) = Invocar match Variables -> tipo_dato Lista_identificadores; Variables?*/
     }
 }
