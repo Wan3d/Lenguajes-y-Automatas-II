@@ -5,13 +5,17 @@ using System.Threading.Tasks;
 
 static void Main(string[] args)
 {
-  int a = Console.ReadLine();
-  Console.WriteLine("El número es 5");
-  /*if(c != 5) {
-    Console.WriteLine("La suma es 2 distinta de " + aux);
+  //char e = 256;
+  int a = 255;
+  char b = 255;
+  b++;
+  char c = (char) (a) + (float) (b);
+
+  if(c != 5) {
+    Console.WriteLine("La suma es distinta de 5");
 
     if(a == 7) {
-      Console.WriteLine("La variable a es igual a " + aux2);
+      Console.WriteLine("La variable a es igual a 7");
     } else {
       Console.WriteLine("Else ejecutado");
     }
@@ -38,8 +42,8 @@ static void Main(string[] args)
       }
     }
   }
-*/
-  /*if(a % 2 != 0) {
+
+  if(a % 2 != 0) {
     Console.WriteLine("Es impar " + a);
     if(b == 2) {
       Console.WriteLine("b es igual a 2");

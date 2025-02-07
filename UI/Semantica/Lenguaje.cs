@@ -1,14 +1,13 @@
 /*
-
 REQUERIMIENTOS:
 
 1) En la clase token, implementar set y get [DONE]
 2) Implementar parámetros por default en el constructor léxico. Investigar cómo implementar un constructor 
-    que haga lo mismo que los dos. Investigar parámetros por default
+    que haga lo mismo que los dos. Investigar parámetros por default 
 3) Implementar línea y columna en los errores semánticos
-
+4) Implementar maximoTipo en la asignación, es decir, cuando se haga v.setValor(r). Checar con una condición
+5) Aplicar el casteo en el stack. Se debe sacar un elemento del stack, calcular el residuo de la divisón y castear según el tipo de dato  
 */
-
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -22,7 +21,6 @@ namespace Semantica
     {
         Stack<float> s;
         List<Variable> l;
-
         Variable.TipoDato maximoTipo;
         public Lenguaje() : base()
         {
@@ -38,7 +36,6 @@ namespace Semantica
             log.WriteLine("Constructor lenguaje");
             maximoTipo = Variable.TipoDato.Char;
         }
-
         private void displayStack()
         {
             Console.WriteLine("Contenido del stack: ");
@@ -47,24 +44,22 @@ namespace Semantica
                 Console.WriteLine(elemento);
             }
         }
-
         private void displayLista()
         {
             log.WriteLine("Lista de variables: ");
             foreach (Variable elemento in l)
             {
-                log.WriteLine($"{elemento.getNombre()} {elemento.GetTipoDato()} {elemento.getValor()}");
+                log.WriteLine($"{elemento.getNombre()} {elemento.getTipoDato()} {elemento.getValor()}");
             }
         }
-
         //Programa  -> Librerias? Variables? Main
         public void Programa()
         {
-            if (getContenido() == "using")
+            if (Contenido == "using")
             {
                 Librerias();
             }
-            if (getClasificacion() == Tipos.TipoDato)
+            if (Clasificacion == Tipos.TipoDato)
             {
                 Variables();
             }
@@ -72,23 +67,21 @@ namespace Semantica
             displayLista();
         }
         //Librerias -> using ListaLibrerias; Librerias?
-
         private void Librerias()
         {
             match("using");
             ListaLibrerias();
             match(";");
-            if (getContenido() == "using")
+            if (Contenido == "using")
             {
                 Librerias();
             }
         }
         //Variables -> tipo_dato Lista_identificadores; Variables?
-
         private void Variables()
         {
             Variable.TipoDato t = Variable.TipoDato.Char;
-            switch (getContenido())
+            switch (Contenido)
             {
                 case "int": t = Variable.TipoDato.Int; break;
                 case "float": t = Variable.TipoDato.Float; break;
@@ -96,7 +89,7 @@ namespace Semantica
             match(Tipos.TipoDato);
             ListaIdentificadores(t);
             match(";");
-            if (getClasificacion() == Tipos.TipoDato)
+            if (Clasificacion == Tipos.TipoDato)
             {
                 Variables();
             }
@@ -105,7 +98,7 @@ namespace Semantica
         private void ListaLibrerias()
         {
             match(Tipos.Identificador);
-            if (getContenido() == ".")
+            if (Contenido == ".")
             {
                 match(".");
                 ListaLibrerias();
@@ -114,21 +107,21 @@ namespace Semantica
         //ListaIdentificadores -> identificador (= Expresion)? (,ListaIdentificadores)?
         private void ListaIdentificadores(Variable.TipoDato t)
         {
-            if (l.Find(variable => variable.getNombre() == getContenido()) != null)
+            if (l.Find(variable => variable.getNombre() == Contenido) != null)
             {
-                throw new Error($"La variable {getContenido()} ya existe", log, linea, columna);
+                throw new Error($"La variable {Contenido} ya existe", log, linea, columna);
             }
-            Variable v = new Variable(t, getContenido());
+            Variable v = new Variable(t, Contenido);
             l.Add(v);
             match(Tipos.Identificador);
-            if (getContenido() == "=")
+            if (Contenido == "=")
             {
                 match("=");
-                if (getContenido() == "Console")
+                if (Contenido == "Console")
                 {
                     match("Console");
                     match(".");
-                    if (getContenido() == "Read")
+                    if (Contenido == "Read")
                     {
                         match("Read");
                         int r = Console.Read();
@@ -153,12 +146,14 @@ namespace Semantica
                 else
                 {
                     // Como no se ingresó un número desde el Console, entonces viene de una expresión matemática
+                    Console.WriteLine("Antes: " + maximoTipo);
                     Expresion();
+                    Console.WriteLine("Despues: " + maximoTipo);
                     float resultado = s.Pop();
                     l.Last().setValor(resultado);
                 }
             }
-            if (getContenido() == ",")
+            if (Contenido == ",")
             {
                 match(",");
                 ListaIdentificadores(t);
@@ -168,7 +163,7 @@ namespace Semantica
         private void BloqueInstrucciones(bool ejecuta)
         {
             match("{");
-            if (getContenido() != "}")
+            if (Contenido != "}")
             {
                 ListaInstrucciones(ejecuta);
             }
@@ -181,7 +176,7 @@ namespace Semantica
         private void ListaInstrucciones(bool ejecuta)
         {
             Instruccion(ejecuta);
-            if (getContenido() != "}")
+            if (Contenido != "}")
             {
                 ListaInstrucciones(ejecuta);
             }
@@ -190,31 +185,30 @@ namespace Semantica
                 match("}");
             }
         }
-
         //Instruccion -> console | If | While | do | For | Variables | Asignación
         private void Instruccion(bool ejecuta)
         {
-            if (getContenido() == "Console")
+            if (Contenido == "Console")
             {
                 console(ejecuta);
             }
-            else if (getContenido() == "if")
+            else if (Contenido == "if")
             {
                 If(ejecuta);
             }
-            else if (getContenido() == "while")
+            else if (Contenido == "while")
             {
                 While();
             }
-            else if (getContenido() == "do")
+            else if (Contenido == "do")
             {
                 Do();
             }
-            else if (getContenido() == "for")
+            else if (Contenido == "for")
             {
                 For();
             }
-            else if (getClasificacion() == Tipos.TipoDato)
+            else if (Clasificacion == Tipos.TipoDato)
             {
                 Variables();
             }
@@ -238,31 +232,31 @@ namespace Semantica
             // Se iniciliaza cada vez que hagamos una expresión matemática
             maximoTipo = Variable.TipoDato.Char;
             float r;
-            Variable? v = l.Find(variable => variable.getNombre() == getContenido());
+            Variable? v = l.Find(variable => variable.getNombre() == Contenido);
             if (v == null)
             {
-                throw new Error("Sintaxis: La variable " + getContenido() + " no está definida", log, linea, columna);
+                throw new Error("Sintaxis: La variable " + Contenido + " no está definida", log, linea, columna);
             }
-            //Console.Write(getContenido() + " = ");
+            //Console.Write(Contenido + " = ");
             match(Tipos.Identificador);
-            if (getContenido() == "++")
+            if (Contenido == "++")
             {
                 match("++");
                 r = v.getValor() + 1;
                 v.setValor(r);
             }
-            else if (getContenido() == "--")
+            else if (Contenido == "--")
             {
                 match("--");
                 r = v.getValor() - 1;
                 v.setValor(r);
             }
-            else if (getContenido() == "=")
+            else if (Contenido == "=")
             {
                 match("=");
-                if (getContenido() == "Console")
+                if (Contenido == "Console")
                 {
-                    ListaIdentificadores(v.GetTipoDato()); // Ya se hace este procedimiento arriba así que simplemente obtenemos a través del método lo que necesitamos
+                    ListaIdentificadores(v.getTipoDato()); // Ya se hace este procedimiento arriba así que simplemente obtenemos a través del método lo que necesitamos
                 }
                 else
                 {
@@ -271,35 +265,35 @@ namespace Semantica
                     v.setValor(r);
                 }
             }
-            else if (getContenido() == "+=")
+            else if (Contenido == "+=")
             {
                 match("+=");
                 Expresion();
                 r = v.getValor() + s.Pop();
                 v.setValor(r);
             }
-            else if (getContenido() == "-=")
+            else if (Contenido == "-=")
             {
                 match("-=");
                 Expresion();
                 r = v.getValor() - s.Pop();
                 v.setValor(r);
             }
-            else if (getContenido() == "*=")
+            else if (Contenido == "*=")
             {
                 match("*=");
                 Expresion();
                 r = v.getValor() * s.Pop();
                 v.setValor(r);
             }
-            else if (getContenido() == "/=")
+            else if (Contenido == "/=")
             {
                 match("/=");
                 Expresion();
                 r = v.getValor() / s.Pop();
                 v.setValor(r);
             }
-            else if (getContenido() == "%=")
+            else if (Contenido == "%=")
             {
                 match("%=");
                 Expresion();
@@ -317,7 +311,7 @@ namespace Semantica
             bool ejecuta = Condicion() && ejecuta2;
             //Console.WriteLine(ejecuta);
             match(")");
-            if (getContenido() == "{")
+            if (Contenido == "{")
             {
                 BloqueInstrucciones(ejecuta);
             }
@@ -325,11 +319,11 @@ namespace Semantica
             {
                 Instruccion(ejecuta);
             }
-            if (getContenido() == "else")
+            if (Contenido == "else")
             {
                 match("else");
                 bool ejecutarElse = !ejecuta; // Solo se ejecuta el else si el if no se ejecutó
-                if (getContenido() == "{")
+                if (Contenido == "{")
                 {
                     BloqueInstrucciones(ejecutarElse);
                 }
@@ -345,7 +339,7 @@ namespace Semantica
             maximoTipo = Variable.TipoDato.Char;
             Expresion();
             float valor1 = s.Pop();
-            string operador = getContenido();
+            string operador = Contenido;
             match(Tipos.OperadorRelacional);
             maximoTipo = Variable.TipoDato.Char;
             Expresion();
@@ -367,7 +361,7 @@ namespace Semantica
             match("(");
             Condicion();
             match(")");
-            if (getContenido() == "{")
+            if (Contenido == "{")
             {
                 BloqueInstrucciones(true);
             }
@@ -381,7 +375,7 @@ namespace Semantica
         private void Do()
         {
             match("do");
-            if (getContenido() == "{")
+            if (Contenido == "{")
             {
                 BloqueInstrucciones(true);
             }
@@ -407,7 +401,7 @@ namespace Semantica
             match(";");
             Asignacion();
             match(")");
-            if (getContenido() == "{")
+            if (Contenido == "{")
             {
                 BloqueInstrucciones(true);
             }
@@ -422,7 +416,7 @@ namespace Semantica
             bool isWriteLine = false;
             match("Console");
             match(".");
-            if (getContenido() == "WriteLine")
+            if (Contenido == "WriteLine")
             {
                 match("WriteLine");
                 isWriteLine = true;
@@ -433,12 +427,12 @@ namespace Semantica
             }
             match("(");
             string concatenaciones = "";
-            if (getClasificacion() == Tipos.Cadena)
+            if (Clasificacion == Tipos.Cadena)
             {
-                concatenaciones = getContenido().Trim('"');
+                concatenaciones = Contenido.Trim('"');
                 match(Tipos.Cadena);
             }
-            if (getContenido() == "+")
+            if (Contenido == "+")
             {
                 match("+");
                 concatenaciones += Concatenaciones();  // Se acumula el resultado de las concatenaciones
@@ -461,25 +455,25 @@ namespace Semantica
         private string Concatenaciones()
         {
             string resultado = "";
-            if (getClasificacion() == Tipos.Identificador)
+            if (Clasificacion == Tipos.Identificador)
             {
-                Variable? v = l.Find(variable => variable.getNombre() == getContenido());
+                Variable? v = l.Find(variable => variable.getNombre() == Contenido);
                 if (v != null)
                 {
                     resultado = v.getValor().ToString(); // Obtener el valor de la variable y convertirla
                 }
                 else
                 {
-                    throw new Error("La variable " + getContenido() + " no está definida", log, linea, columna);
+                    throw new Error("La variable " + Contenido + " no está definida", log, linea, columna);
                 }
                 match(Tipos.Identificador);
             }
-            else if (getClasificacion() == Tipos.Cadena)
+            else if (Clasificacion == Tipos.Cadena)
             {
-                resultado = getContenido().Trim('"');
+                resultado = Contenido.Trim('"');
                 match(Tipos.Cadena);
             }
-            if (getContenido() == "+")
+            if (Contenido == "+")
             {
                 match("+");
                 resultado += Concatenaciones();  // Acumula el siguiente fragmento de concatenación
@@ -509,9 +503,9 @@ namespace Semantica
         //MasTermino -> (OperadorTermino Termino)?
         private void MasTermino()
         {
-            if (getClasificacion() == Tipos.OperadorTermino)
+            if (Clasificacion == Tipos.OperadorTermino)
             {
-                string operador = getContenido();
+                string operador = Contenido;
                 match(Tipos.OperadorTermino);
                 Termino();
                 //Console.Write(operador + " ");
@@ -533,9 +527,9 @@ namespace Semantica
         //PorFactor -> (OperadorFactor Factor)?
         private void PorFactor()
         {
-            if (getClasificacion() == Tipos.OperadorFactor)
+            if (Clasificacion == Tipos.OperadorFactor)
             {
-                string operador = getContenido();
+                string operador = Contenido;
                 match(Tipos.OperadorFactor);
                 Factor();
                 //Console.Write(operador + " ");
@@ -552,28 +546,60 @@ namespace Semantica
         //Factor -> numero | identificador | (Expresion)
         private void Factor()
         {
-            if (getClasificacion() == Tipos.Numero)
+            if (Clasificacion == Tipos.Numero)
             {
-                Variable.valorToTipoDato(float.Parse(getContenido()));
-                s.Push(float.Parse(getContenido()));
-                //Console.Write(getContenido() + " ");
+                //Variable.valorToTipoDato(float.Parse(Contenido)); 
+                if (maximoTipo < Variable.valorToTipoDato(float.Parse(Contenido)))
+                {
+                    maximoTipo = Variable.valorToTipoDato(float.Parse(Contenido));
+                }
+                s.Push(float.Parse(Contenido));
+                //Console.Write(Contenido + " ");
                 match(Tipos.Numero);
             }
-            else if (getClasificacion() == Tipos.Identificador)
+            else if (Clasificacion == Tipos.Identificador)
             {
-                Variable? v = l.Find(variable => variable.getNombre() == getContenido());
+                Variable? v = l.Find(variable => variable.getNombre() == Contenido);
                 if (v == null)
                 {
-                    throw new Error("Sintaxis: la variable " + getContenido() + " no está definida", log, linea, columna);
+                    throw new Error("Sintaxis: la variable " + Contenido + " no está definida", log, linea, columna);
+                }
+                if (maximoTipo < v.getTipoDato())
+                {
+                    maximoTipo = v.getTipoDato();
                 }
                 s.Push(v.getValor());
-                //Console.Write(getContenido() + " ");
+                //Console.Write(Contenido + " ");
                 match(Tipos.Identificador);
             }
             else
             {
                 match("(");
+                Variable.TipoDato tipoCasteo = Variable.TipoDato.Char;
+                bool huboCasteo = false;
+                if (Clasificacion == Tipos.TipoDato)
+                {
+                    switch (Contenido)
+                    {
+                        case "int": tipoCasteo = Variable.TipoDato.Int; break;
+                        case "float": tipoCasteo = Variable.TipoDato.Float; break;
+                    }
+                    match(Tipos.TipoDato);
+                    match(")");
+                    match("(");
+                    huboCasteo = true;
+                }
                 Expresion();
+                if (huboCasteo)
+                {
+                    maximoTipo = tipoCasteo;
+                    /*
+                    [REQUERIMIENTO 5]
+                    s.Pop();
+                    Residuo de la división del maximoTipo
+                    s.Push();
+                    */
+                }
                 match(")");
             }
         }

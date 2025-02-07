@@ -17,7 +17,7 @@ namespace Semantica
         }
         public void match(string contenido)
         {
-            if (contenido == getContenido())
+            if (contenido == Contenido)
             {
                 nextToken();
             }
@@ -28,7 +28,7 @@ namespace Semantica
         }
         public void match(Tipos clasificacion)
         {
-            if (clasificacion == getClasificacion())
+            if (clasificacion == Clasificacion)
             {
                 nextToken();
             }
