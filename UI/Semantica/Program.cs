@@ -11,7 +11,7 @@ namespace Semantica
         {
             try
             {
-                using (Lenguaje lexico = new("prueba.cpp"))
+                using (Lenguaje lexico = new())
                 {
                     lexico.Programa();
                 }

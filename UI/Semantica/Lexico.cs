@@ -61,24 +61,8 @@ namespace Semantica
                 { 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 37, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36  },
                 { 36, 36, 36, 36, 36, 36, 35, 36, 36, 36, 36, 36, 37, 36, 36, 36, 36, 36, 36, 36, 36, 36,  0, 36, 36, 36  }
             };
-        public Lexico()
+        public Lexico(string nombreArchivo = "prueba.cpp")
         {
-            log = new StreamWriter("prueba.log");
-            asm = new StreamWriter("prueba.asm");
-            log.AutoFlush = true;
-            asm.AutoFlush = true;
-            if (File.Exists("prueba.cpp"))
-            {
-                archivo = new StreamReader("prueba.cpp");
-            }
-            else
-            {
-                throw new Error("El archivo prueba.cpp no existe", log);
-            }
-        }
-        public Lexico(string nombreArchivo)
-        {
-
             string nombreArchivoWithoutExt = Path.GetFileNameWithoutExtension(nombreArchivo);   /* Obtenemos el nombre del archivo sin la extensión para poder crear el .log y .asm */
             if (File.Exists(nombreArchivo))
             {

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Semantica
 {
-    public class Variable
+    public class Variable 
     {
         public enum TipoDato
         {
@@ -14,6 +14,7 @@ namespace Semantica
         TipoDato tipo;
         string nombre;
         float valor;
+
         public Variable(TipoDato tipo, string nombre, float valor = 0)
         {
             this.tipo = tipo;

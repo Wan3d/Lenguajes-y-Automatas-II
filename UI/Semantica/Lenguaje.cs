@@ -3,8 +3,8 @@ REQUERIMIENTOS:
 
 1) En la clase token, implementar set y get [DONE]
 2) Implementar parámetros por default en el constructor léxico. Investigar cómo implementar un constructor 
-    que haga lo mismo que los dos. Investigar parámetros por default 
-3) Implementar línea y columna en los errores semánticos
+    que haga lo mismo que los dos. Investigar parámetros por default [DONE]
+3) Implementar línea y columna en los errores semánticos 
 4) Implementar maximoTipo en la asignación, es decir, cuando se haga v.setValor(r). Checar con una condición
 5) Aplicar el casteo en el stack. Se debe sacar un elemento del stack, calcular el residuo de la divisón y castear según el tipo de dato  
 */
