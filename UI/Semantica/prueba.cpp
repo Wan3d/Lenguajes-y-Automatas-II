@@ -5,11 +5,14 @@ using System.Threading.Tasks;
 
 static void Main(string[] args)
 {
-  char e = 256;
-  int a = 255;
-  char b = 255;
+  int a = 65535;
+  int b = 65535;
   b++;
-  char c = (char) (a) + (float) (b);
+  //char e = 256;
+  /*int a = 65533;
+  char b = 252;
+  b++
+  char c = (char) (a) + (float) (b);*/
 
   if(c != 5) {
     Console.WriteLine("La suma es distinta de 5");

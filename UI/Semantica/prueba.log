@@ -1,4 +1,5 @@
 Archivo: prueba.cpp
-Fecha y hora: 07/02/2025 23:46:00
+Fecha y hora: 08/02/2025 17:56:20
 ----------------------------------
 Constructor lenguaje
+Error: Tipo dato. No está permitido asignar un valor Float a una variable Char en la linea [10] en la columna [7]

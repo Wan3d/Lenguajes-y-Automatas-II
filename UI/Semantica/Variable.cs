@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Semantica
 {
-    public class Variable 
+    public class Variable
     {
         public enum TipoDato
         {
@@ -29,7 +29,7 @@ namespace Semantica
             }
             else
             {
-                throw new Error("Semántico. No se puede asignar un " + valorToTipoDato(valor) + " a un " + tipo + " en la variable " + nombre);
+                throw new Error("Semántico. No se puede asignar un " + valorToTipoDato(valor) + " a un " + tipo + " en la variable " + nombre, Lexico.log, Lexico.linea, Lexico.columna);
             }
         }
         public static TipoDato valorToTipoDato(float valor)
@@ -42,7 +42,7 @@ namespace Semantica
             {
                 return TipoDato.Char;
             }
-            else if (valor <= Math.Pow(2, 16))
+            else if (valor <= 65535)
             {
                 return TipoDato.Int;
             }
