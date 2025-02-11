@@ -5,8 +5,8 @@ REQUERIMIENTOS:
 2) Implementar parámetros por default en el constructor léxico. Investigar cómo implementar un constructor 
     que haga lo mismo que los dos. Investigar parámetros por default [DONE]
 3) Implementar línea y columna en los errores semánticos [DONE]
-4) Implementar maximoTipo en la asignación, es decir, cuando se haga v.setValor(r). Checar con una condición [%]
-5) Aplicar el casteo en el stack. Se debe sacar un elemento del stack, calcular el residuo de la divisón y castear según el tipo de dato  
+4) Implementar maximoTipo en la asignación, es decir, cuando se haga v.setValor(r). Checar con una condición [DONE]
+5) Aplicar el casteo en el stack. Se debe sacar un elemento del stack, calcular el residuo de la divisón y castear según el tipo de dato [DONE]
 */
 using System;
 using System.Collections.Generic;
@@ -125,9 +125,9 @@ namespace Semantica
                     {
                         match("Read");
                         int r = Console.Read();
-                        if (maximoTipo < Variable.valorToTipoDato(r))
+                        if (maximoTipo > Variable.valorToTipoDato(r))
                         {
-                            throw new Error("Tipo dato. No está permitido asignar un valor " + Variable.valorToTipoDato(r) + " a una variable " + maximoTipo, log, linea, columna);
+                            throw new Error("Tipo dato. No está permitido asignar un valor " + maximoTipo + " a una variable " + Variable.valorToTipoDato(r), log, linea, columna);
                         }
                         v.setValor(r);
                     }
@@ -137,9 +137,9 @@ namespace Semantica
                         string? r = Console.ReadLine();
                         if (float.TryParse(r, out float valor))
                         {
-                            if (maximoTipo < Variable.valorToTipoDato(valor))
+                            if (maximoTipo > Variable.valorToTipoDato(valor))
                             {
-                                throw new Error("Tipo dato. No está permitido asignar un valor " + Variable.valorToTipoDato(valor) + " a una variable " + maximoTipo, log, linea, columna);
+                                throw new Error("Tipo dato. No está permitido asignar un valor " + maximoTipo + " a una variable " + Variable.valorToTipoDato(valor), log, linea, columna);
                             }
                             v.setValor(valor);
                         }
@@ -158,10 +158,6 @@ namespace Semantica
                     Expresion();
                     Console.WriteLine("Despues: " + maximoTipo);
                     float r = s.Pop();
-                    if (maximoTipo < Variable.valorToTipoDato(r))
-                    {
-                        throw new Error("Tipo dato. No está permitido asignar un valor " + Variable.valorToTipoDato(r) + " a una variable " + maximoTipo, log, linea, columna);
-                    }
                     v.setValor(r);
                 }
             }
@@ -255,9 +251,9 @@ namespace Semantica
             {
                 match("++");
                 r = v.getValor() + 1;
-                if (maximoTipo < Variable.valorToTipoDato(r))
+                if (maximoTipo > Variable.valorToTipoDato(r))
                 {
-                    throw new Error("Tipo dato. No está permitido asignar un valor " + Variable.valorToTipoDato(r) + " a una variable " + maximoTipo, log, linea, columna);
+                    throw new Error("Tipo dato. No está permitido asignar un valor " + maximoTipo + " a una variable " + Variable.valorToTipoDato(r), log, linea, columna);
                 }
                 v.setValor(r);
             }
@@ -265,9 +261,9 @@ namespace Semantica
             {
                 match("--");
                 r = v.getValor() - 1;
-                if (maximoTipo < Variable.valorToTipoDato(r))
+                if (maximoTipo > Variable.valorToTipoDato(r))
                 {
-                    throw new Error("Tipo dato. No está permitido asignar un valor " + Variable.valorToTipoDato(r) + " a una variable " + maximoTipo, log, linea, columna);
+                    throw new Error("Tipo dato. No está permitido asignar un valor " + maximoTipo + " a una variable " + Variable.valorToTipoDato(r), log, linea, columna);
                 }
                 v.setValor(r);
             }
@@ -282,9 +278,9 @@ namespace Semantica
                 {
                     Expresion();
                     r = s.Pop();
-                    if (maximoTipo < Variable.valorToTipoDato(r))
+                    if (maximoTipo > Variable.valorToTipoDato(r))
                     {
-                        throw new Error("Tipo dato. No está permitido asignar un valor " + Variable.valorToTipoDato(r) + " a una variable " + maximoTipo, log, linea, columna);
+                        throw new Error("Tipo dato. No está permitido asignar un valor " + maximoTipo + " a una variable " + Variable.valorToTipoDato(r), log, linea, columna);
                     }
                     v.setValor(r);
                 }
@@ -294,9 +290,9 @@ namespace Semantica
                 match("+=");
                 Expresion();
                 r = v.getValor() + s.Pop();
-                if (maximoTipo < Variable.valorToTipoDato(r))
+                if (maximoTipo > Variable.valorToTipoDato(r))
                 {
-                    throw new Error("Tipo dato. No está permitido asignar un valor " + Variable.valorToTipoDato(r) + " a una variable " + maximoTipo, log, linea, columna);
+                    throw new Error("Tipo dato. No está permitido asignar un valor " + maximoTipo + " a una variable " + Variable.valorToTipoDato(r), log, linea, columna);
                 }
                 v.setValor(r);
             }
@@ -305,9 +301,9 @@ namespace Semantica
                 match("-=");
                 Expresion();
                 r = v.getValor() - s.Pop();
-                if (maximoTipo < Variable.valorToTipoDato(r))
+                if (maximoTipo > Variable.valorToTipoDato(r))
                 {
-                    throw new Error("Tipo dato. No está permitido asignar un valor " + Variable.valorToTipoDato(r) + " a una variable " + maximoTipo, log, linea, columna);
+                    throw new Error("Tipo dato. No está permitido asignar un valor " + maximoTipo + " a una variable " + Variable.valorToTipoDato(r), log, linea, columna);
                 }
                 v.setValor(r);
             }
@@ -316,9 +312,9 @@ namespace Semantica
                 match("*=");
                 Expresion();
                 r = v.getValor() * s.Pop();
-                if (maximoTipo < Variable.valorToTipoDato(r))
+                if (maximoTipo > Variable.valorToTipoDato(r))
                 {
-                    throw new Error("Tipo dato. No está permitido asignar un valor " + Variable.valorToTipoDato(r) + " a una variable " + maximoTipo, log, linea, columna);
+                    throw new Error("Tipo dato. No está permitido asignar un valor " + maximoTipo + " a una variable " + Variable.valorToTipoDato(r), log, linea, columna);
                 }
                 v.setValor(r);
             }
@@ -327,9 +323,9 @@ namespace Semantica
                 match("/=");
                 Expresion();
                 r = v.getValor() / s.Pop();
-                if (maximoTipo < Variable.valorToTipoDato(r))
+                if (maximoTipo > Variable.valorToTipoDato(r))
                 {
-                    throw new Error("Tipo dato. No está permitido asignar un valor " + Variable.valorToTipoDato(r) + " a una variable " + maximoTipo, log, linea, columna);
+                    throw new Error("Tipo dato. No está permitido asignar un valor " + maximoTipo + " a una variable " + Variable.valorToTipoDato(r), log, linea, columna);
                 }
                 v.setValor(r);
             }
@@ -338,9 +334,9 @@ namespace Semantica
                 match("%=");
                 Expresion();
                 r = v.getValor() % s.Pop();
-                if (maximoTipo < Variable.valorToTipoDato(r))
+                if (maximoTipo > Variable.valorToTipoDato(r))
                 {
-                    throw new Error("Tipo dato. No está permitido asignar un valor " + Variable.valorToTipoDato(r) + " a una variable " + maximoTipo, log, linea, columna);
+                    throw new Error("Tipo dato. No está permitido asignar un valor " + maximoTipo + " a una variable " + Variable.valorToTipoDato(r), log, linea, columna);
                 }
                 v.setValor(r);
             }
@@ -637,13 +633,15 @@ namespace Semantica
                 if (huboCasteo)
                 {
                     maximoTipo = tipoCasteo;
-                    /*
-                    [REQUERIMIENTO 5]
                     float r = s.Pop();
-                    Residuo de la división del maximoTipo float = valor % maximoTipo;
-                    s.Push();
-                    */
-
+                    float valor = r;
+                    switch (tipoCasteo)
+                    {
+                        case Variable.TipoDato.Int: valor = (int)(r % 65536); break;
+                        case Variable.TipoDato.Char: valor = (char)(r % 256); break;
+                        case Variable.TipoDato.Float: valor = r; break;
+                    }
+                    s.Push(valor);
                 }
                 match(")");
             }
