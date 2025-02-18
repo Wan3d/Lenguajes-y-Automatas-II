@@ -63,26 +63,29 @@ namespace Semantica
             };
         public Lexico(string nombreArchivo = "prueba.cpp")
         {
-            if (Path.GetExtension(nombreArchivo) != ".cpp")
+            if (Path.GetExtension(nombreArchivo) == ".cpp")
             {
-                throw new Error("El archivo debe ser de extensión .cpp");
-            }
-            if (File.Exists(nombreArchivo))
-            {
-                string nombreArchivoWithoutExt = Path.GetFileNameWithoutExtension(nombreArchivo);   /* Obtenemos el nombre del archivo sin la extensión para poder crear el .log y .asm */
-                log = new StreamWriter(nombreArchivoWithoutExt + ".log");
-                asm = new StreamWriter(nombreArchivoWithoutExt + ".asm");
-                log.AutoFlush = true;
-                asm.AutoFlush = true;
-                archivo = new StreamReader(nombreArchivo);
-                DateTime ahora = DateTime.Now;
-                log.WriteLine("Archivo: " + nombreArchivo);
-                log.WriteLine("Fecha y hora: " + ahora.ToString());
-                log.WriteLine("----------------------------------");
+                if (File.Exists(nombreArchivo))
+                {
+                    string nombreArchivoWithoutExt = Path.GetFileNameWithoutExtension(nombreArchivo);   //Obtenemos el nombre del archivo sin la extensión para poder crear el .log y .asm
+                    log = new StreamWriter(nombreArchivoWithoutExt + ".log");
+                    asm = new StreamWriter(nombreArchivoWithoutExt + ".asm");
+                    log.AutoFlush = true;
+                    asm.AutoFlush = true;
+                    archivo = new StreamReader(nombreArchivo);
+                    DateTime ahora = DateTime.Now;
+                    log.WriteLine("Archivo: " + nombreArchivo);
+                    log.WriteLine("Fecha y hora: " + ahora.ToString());
+                    log.WriteLine("----------------------------------");
+                }
+                else
+                {
+                    throw new Error("El archivo " + nombreArchivo + " no existe");
+                }
             }
             else
             {
-                throw new Error("El archivo " + nombreArchivo + " no existe");
+                throw new Error("La extensión debe ser .cpp");
             }
         }
         public void Dispose()
