@@ -634,14 +634,12 @@ namespace Semantica
                 {
                     maximoTipo = tipoCasteo;
                     float r = s.Pop();
-                    float valor = r;
                     switch (tipoCasteo)
                     {
-                        case Variable.TipoDato.Int: valor = (int)(r % 65536); break;
-                        case Variable.TipoDato.Char: valor = (char)(r % 256); break;
-                        case Variable.TipoDato.Float: valor = r; break;
+                        case Variable.TipoDato.Int: r = (r % 65536); break;
+                        case Variable.TipoDato.Char: r = (r % 256); break;
                     }
-                    s.Push(valor);
+                    s.Push(r);
                 }
                 match(")");
             }

@@ -20,7 +20,7 @@ namespace Semantica
         public static int linea = 1;
         const int F = -1;
         const int E = -2;
-        public static  int columna = 1;
+        public static int columna = 1;
         readonly int[,] TRAND = {
                 {  0,  1,  2, 33,  1, 12, 14,  8,  9, 10, 11, 23, 16, 16, 18, 20, 21, 26, 25, 27, 29, 32, 34,  0,  F, 33  },
                 {  F,  1,  1,  F,  1,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F  },
@@ -63,9 +63,13 @@ namespace Semantica
             };
         public Lexico(string nombreArchivo = "prueba.cpp")
         {
-            string nombreArchivoWithoutExt = Path.GetFileNameWithoutExtension(nombreArchivo);   /* Obtenemos el nombre del archivo sin la extensión para poder crear el .log y .asm */
+            if (Path.GetExtension(nombreArchivo) != ".cpp")
+            {
+                throw new Error("El archivo debe ser de extensión .cpp");
+            }
             if (File.Exists(nombreArchivo))
             {
+                string nombreArchivoWithoutExt = Path.GetFileNameWithoutExtension(nombreArchivo);   /* Obtenemos el nombre del archivo sin la extensión para poder crear el .log y .asm */
                 log = new StreamWriter(nombreArchivoWithoutExt + ".log");
                 asm = new StreamWriter(nombreArchivoWithoutExt + ".asm");
                 log.AutoFlush = true;
@@ -76,14 +80,9 @@ namespace Semantica
                 log.WriteLine("Fecha y hora: " + ahora.ToString());
                 log.WriteLine("----------------------------------");
             }
-            else if (Path.GetExtension(nombreArchivo) != ".cpp")
-            {
-                throw new ArgumentException("El archivo debe ser de extensión .cpp");
-            }
             else
             {
-                
-                throw new FileNotFoundException("La extensión " + Path.GetExtension(nombreArchivo) + " no existe");    /* Defino una excepción que indica que existe un error con el archivo en caso de no ser encontrado */
+                throw new Error("El archivo " + nombreArchivo + " no existe");
             }
         }
         public void Dispose()

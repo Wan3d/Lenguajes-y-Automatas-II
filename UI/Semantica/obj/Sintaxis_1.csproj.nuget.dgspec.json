@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\zullo\\OneDrive\\Escritorio\\V - Semestre\\Lenguajes y automatas II\\Proyectos\\UI\\Semantica\\Sintaxis_1.csproj": {}
+    "C:\\Users\\zullo\\OneDrive\\Escritorio\\V - Semestre\\Lenguajes y Automatas II\\Proyectos\\UI\\Semantica\\Sintaxis_1.csproj": {}
   },
   "projects": {
-    "C:\\Users\\zullo\\OneDrive\\Escritorio\\V - Semestre\\Lenguajes y automatas II\\Proyectos\\UI\\Semantica\\Sintaxis_1.csproj": {
+    "C:\\Users\\zullo\\OneDrive\\Escritorio\\V - Semestre\\Lenguajes y Automatas II\\Proyectos\\UI\\Semantica\\Sintaxis_1.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\zullo\\OneDrive\\Escritorio\\V - Semestre\\Lenguajes y automatas II\\Proyectos\\UI\\Semantica\\Sintaxis_1.csproj",
+        "projectUniqueName": "C:\\Users\\zullo\\OneDrive\\Escritorio\\V - Semestre\\Lenguajes y Automatas II\\Proyectos\\UI\\Semantica\\Sintaxis_1.csproj",
         "projectName": "Sintaxis_1",
-        "projectPath": "C:\\Users\\zullo\\OneDrive\\Escritorio\\V - Semestre\\Lenguajes y automatas II\\Proyectos\\UI\\Semantica\\Sintaxis_1.csproj",
+        "projectPath": "C:\\Users\\zullo\\OneDrive\\Escritorio\\V - Semestre\\Lenguajes y Automatas II\\Proyectos\\UI\\Semantica\\Sintaxis_1.csproj",
         "packagesPath": "C:\\Users\\zullo\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\zullo\\OneDrive\\Escritorio\\V - Semestre\\Lenguajes y automatas II\\Proyectos\\UI\\Semantica\\obj\\",
+        "outputPath": "C:\\Users\\zullo\\OneDrive\\Escritorio\\V - Semestre\\Lenguajes y Automatas II\\Proyectos\\UI\\Semantica\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\zullo\\AppData\\Roaming\\NuGet\\NuGet.Config"
