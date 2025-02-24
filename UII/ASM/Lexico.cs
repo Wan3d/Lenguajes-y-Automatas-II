@@ -10,7 +10,7 @@ using System.Data.Common;
 using System.IO.Compression;
 using Microsoft.VisualBasic;
 
-namespace Semantica
+namespace ASM
 {
     public class Lexico : Token, IDisposable
     {
@@ -77,6 +77,9 @@ namespace Semantica
                     log.WriteLine("Archivo: " + nombreArchivo);
                     log.WriteLine("Fecha y hora: " + ahora.ToString());
                     log.WriteLine("----------------------------------");
+                    asm.WriteLine("; Archivo: " + nombreArchivo);
+                    asm.WriteLine("; Fecha y hora: " + ahora.ToString());
+                    asm.WriteLine("----------------------------------");
                 }
                 else
                 {

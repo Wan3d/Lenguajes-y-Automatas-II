@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Semantica
+namespace ASM
 {
     public class Program : Token
     {
@@ -11,7 +11,7 @@ namespace Semantica
         {
             try
             {
-                using (Lenguaje lexico = new("prueba3.txt"))
+                using (Lenguaje lexico = new())
                 {
                     lexico.Programa();
                 }
