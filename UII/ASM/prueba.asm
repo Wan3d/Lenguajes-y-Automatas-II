@@ -1,6 +1,10 @@
 ; Archivo: prueba.cpp
-; Fecha y hora: 24/02/2025 11:57:46
-----------------------------------
+; Fecha y hora: 25/02/2025 12:37:18
+;----------------------------------
+SEGMENT .TEXT
+GLOBAL MAIN
+MAIN:
+; Asignación de x26
     MOV EAX, 3
     PUSH AX
     MOV EAX, 5
@@ -28,9 +32,12 @@
     POP EBX
     POP EAX
     DIV EBX
-    PUSH AL
+    PUSH EAX
     POP EBX
     POP EAX
     SUB EAX, EBX
     PUSH EAX
-    POP
+    POP EAX
+    MOV DWORD[x26], EAX
+SECTION .DATA
+x26 DB 0

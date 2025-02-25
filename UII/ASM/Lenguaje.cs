@@ -1,12 +1,7 @@
 /*
 REQUERIMIENTOS:
-
-1) En la clase token, implementar set y get [DONE]
-2) Implementar parámetros por default en el constructor léxico. Investigar cómo implementar un constructor 
-    que haga lo mismo que los dos. Investigar parámetros por default [DONE]
-3) Implementar línea y columna en los errores semánticos [DONE]
-4) Implementar maximoTipo en la asignación, es decir, cuando se haga v.setValor(r). Checar con una condición [DONE]
-5) Aplicar el casteo en el stack. Se debe sacar un elemento del stack, calcular el residuo de la divisón y castear según el tipo de dato [DONE]
+1. Declarar las variables con su tipo correspondiente en Ensamblador. O sea, declararlas con su tipo de dato correspondiente (Como Char, Byte, Int)
+2.
 */
 using System;
 using System.Collections.Generic;
@@ -46,10 +41,12 @@ namespace ASM
         }
         private void displayLista()
         {
+            asm.WriteLine("SECTION .DATA");
             log.WriteLine("Lista de variables: ");
             foreach (Variable elemento in l)
             {
                 log.WriteLine($"{elemento.getNombre()} {elemento.getTipoDato()} {elemento.getValor()}");
+                asm.WriteLine($"{elemento.getNombre()} DB 0");
             }
         }
         //Programa  -> Librerias? Variables? Main
@@ -155,10 +152,12 @@ namespace ASM
                 {
                     // Como no se ingresó un número desde el Console, entonces viene de una expresión matemática
                     //Console.WriteLine("Antes: " + maximoTipo);
+                    asm.WriteLine($"; Asignación de {v.getNombre()}");
                     Expresion();
                     //Console.WriteLine("Despues: " + maximoTipo);
                     float r = s.Pop();
-                    asm.WriteLine("    POP");
+                    asm.WriteLine("    POP EAX");
+                    asm.WriteLine($"    MOV DWORD[{v.getNombre()}], EAX");
                     v.setValor(r);
                 }
             }
@@ -277,9 +276,11 @@ namespace ASM
                 }
                 else
                 {
+                    asm.WriteLine($"; Asignación de {v.getNombre()}");
                     Expresion();
                     r = s.Pop();
-                    asm.WriteLine("    POP");
+                    asm.WriteLine("    POP EAX");
+                    asm.WriteLine($"   MOV DWORD[{v.getNombre()}], EAX");
                     if (maximoTipo > Variable.valorToTipoDato(r))
                     {
                         throw new Error("Tipo dato. No está permitido asignar un valor " + maximoTipo + " a una variable " + Variable.valorToTipoDato(r), log, linea, columna);
@@ -604,12 +605,12 @@ namespace ASM
                     case "/":
                         s.Push(n2 / n1);
                         asm.WriteLine("    DIV EBX");
-                        asm.WriteLine("    PUSH AL");
+                        asm.WriteLine("    PUSH EAX");
                         break;
                     case "%":
                         s.Push(n2 % n1);
                         asm.WriteLine("    DIV EBX");
-                        asm.WriteLine("    PUSH AH");
+                        asm.WriteLine("    PUSH EDX");
                         break;
                 }
             }
@@ -642,8 +643,8 @@ namespace ASM
                     maximoTipo = v.getTipoDato();
                 }
                 s.Push(v.getValor());
-                asm.WriteLine("    MOV EAX, " + Contenido);
-                asm.WriteLine("    PUSH EAX");
+                asm.WriteLine("     MOV EAX, " + Contenido);
+                asm.WriteLine("     PUSH EAX");
                 //Console.Write(Contenido + " ");
                 match(Tipos.Identificador);
             }
