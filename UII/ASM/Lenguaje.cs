@@ -1,6 +1,6 @@
 /*
 REQUERIMIENTOS:
-1. Declarar las variables con su tipo correspondiente en Ensamblador. O sea, declararlas con su tipo de dato correspondiente (Como Char, Byte, Int)
+1. Declarar las variables con su tipo correspondiente en Ensamblador. O sea, declararlas con su tipo de dato correspondiente (Como Char, Byte, Int) [DONE]
 2. En Asignación, generar código en Ensamblador para ++(inc) & --(dec) [DONE]
 3. En Asignación, generar código en Ensamblador para +=, -=, *=, /=, %= [DONE]
 4. Generar código en Ensamblador para Console.Write y Console.WriteLine
@@ -10,7 +10,7 @@ REQUERIMIENTOS:
 8. Programar el For
 9. Condicionar todos los setValor en Asignación | ListaIdentificadores (If (ejecuta){}) [DONE]
 10. Programar el Else
-11. Usar set y get en Variable
+11. Usar set y get en Variable [DONE]
 12. Ajustar todos los constructores con parámetros con default [DONE]
 */
 using System;
@@ -50,18 +50,18 @@ namespace ASM
             log.WriteLine("Lista de variables: ");
             foreach (Variable elemento in l)
             {
-                log.WriteLine($"{elemento.getNombre()} {elemento.getTipoDato()} {elemento.getValor()}");
-                if (elemento.getTipoDato() == Variable.TipoDato.Char)
+                log.WriteLine($"{elemento.Nombre} {elemento.Tipo} {elemento.Valor}");
+                if (elemento.Tipo == Variable.TipoDato.Char)
                 {
-                    asm.WriteLine($"{elemento.getNombre()} DB {elemento.getValor()}");
+                    asm.WriteLine($"{elemento.Nombre} DB {elemento.Valor}");
                 }
-                else if (elemento.getTipoDato() == Variable.TipoDato.Int)
+                else if (elemento.Tipo == Variable.TipoDato.Int)
                 {
-                    asm.WriteLine($"{elemento.getNombre()} DW {elemento.getValor()}");
+                    asm.WriteLine($"{elemento.Nombre} DW {elemento.Valor}");
                 }
                 else
                 {
-                    asm.WriteLine($"{elemento.getNombre()} DD {elemento.getValor()}");
+                    asm.WriteLine($"{elemento.Nombre} DD {elemento.Valor}");
                 }
             }
         }
@@ -121,7 +121,7 @@ namespace ASM
         //ListaIdentificadores -> identificador (= Expresion)? (,ListaIdentificadores)?
         private void ListaIdentificadores(bool ejecuta, Variable.TipoDato t)
         {
-            if (l.Find(variable => variable.getNombre() == Contenido) != null)
+            if (l.Find(variable => variable.Nombre == Contenido) != null)
             {
                 throw new Error($"La variable {Contenido} ya existe", log, linea, columna);
             }
@@ -175,12 +175,12 @@ namespace ASM
                 {
                     // Como no se ingresó un número desde el Console, entonces viene de una expresión matemática
                     //Console.WriteLine("Antes: " + maximoTipo);
-                    asm.WriteLine($"; Asignación de {v.getNombre()}");
+                    asm.WriteLine($"; Asignación de {v.Nombre}");
                     Expresion();
                     //Console.WriteLine("Despues: " + maximoTipo);
                     float r = s.Pop();
                     asm.WriteLine("\tPOP EAX");
-                    asm.WriteLine($"\tMOV [{v.getNombre()}], EAX");
+                    asm.WriteLine($"\tMOV [{v.Nombre}], EAX");
                     if (ejecuta)
                     {
                         v.setValor(r);
@@ -266,7 +266,7 @@ namespace ASM
             // Se iniciliaza cada vez que hagamos una expresión matemática
             maximoTipo = Variable.TipoDato.Char;
             float r;
-            Variable? v = l.Find(variable => variable.getNombre() == Contenido);
+            Variable? v = l.Find(variable => variable.Nombre == Contenido);
             if (v == null)
             {
                 throw new Error("Sintaxis: La variable " + Contenido + " no está definida", log, linea, columna);
@@ -276,23 +276,19 @@ namespace ASM
             if (Contenido == "++")
             {
                 match("++");
-                r = v.getValor() + 1;
-                asm.WriteLine("\tINC " + v.getNombre());
-                /*if (maximoTipo > Variable.valorToTipoDato(r))
-                {
-                    throw new Error("Tipo dato. No está permitido asignar un valor " + maximoTipo + " a una variable " + Variable.valorToTipoDato(r), log, linea, columna);
-                }*/
+                r = v.Valor + 1;
+                asm.WriteLine("\tMOV AL, [" + v.Nombre + "]");
+                asm.WriteLine("\tINC AL");
+                asm.WriteLine("\tMOV [" + v.Nombre + "], AL");
                 v.setValor(r);
             }
             else if (Contenido == "--")
             {
                 match("--");
-                r = v.getValor() - 1;
-                asm.WriteLine("\tDEC " + v.getNombre());
-                /*if (maximoTipo > Variable.valorToTipoDato(r))
-                {
-                    throw new Error("Tipo dato. No está permitido asignar un valor " + maximoTipo + " a una variable " + Variable.valorToTipoDato(r), log, linea, columna);
-                }*/
+                r = v.Valor - 1;
+                asm.WriteLine("\tMOV AL, [" + v.Nombre + "]");
+                asm.WriteLine("\tDEC AL");
+                asm.WriteLine("\tMOV [" + v.Nombre + "], AL");
                 v.setValor(r);
             }
             else if (Contenido == "=")
@@ -300,15 +296,15 @@ namespace ASM
                 match("=");
                 if (Contenido == "Console")
                 {
-                    ListaIdentificadores(ejecuta, v.getTipoDato()); // Ya se hace este procedimiento arriba así que simplemente obtenemos a través del método lo que necesitamos
+                    ListaIdentificadores(ejecuta, v.Tipo); // Ya se hace este procedimiento arriba así que simplemente obtenemos a través del método lo que necesitamos
                 }
                 else
                 {
-                    //asm.WriteLine($"; Asignación de {v.getNombre()}");
+                    //asm.WriteLine($"; Asignación de {v.Nombre}");
                     Expresion();
                     r = s.Pop();
                     asm.WriteLine("\tPOP EAX");
-                    asm.WriteLine($"\tMOV [{v.getNombre()}], EAX");
+                    asm.WriteLine($"\tMOV [{v.Nombre}], EAX");
                     if (ejecuta)
                     {
                         /*if (maximoTipo > Variable.valorToTipoDato(r))
@@ -324,14 +320,10 @@ namespace ASM
                 match("+=");
                 Expresion();
                 float valorSuma = s.Pop();
-                r = v.getValor() + valorSuma;
-                asm.WriteLine("\tMOV EAX, [" + v.getNombre() + "]");
+                r = v.Valor + valorSuma;
+                asm.WriteLine("\tMOV EAX, [" + v.Nombre + "]");
                 asm.WriteLine("\tADD EAX, [" + valorSuma + "]");
-                asm.WriteLine("\tMOV [" + v.getNombre() + "], EAX");
-                /*if (maximoTipo > Variable.valorToTipoDato(r))
-                {
-                    throw new Error("Tipo dato. No está permitido asignar un valor " + maximoTipo + " a una variable " + Variable.valorToTipoDato(r), log, linea, columna);
-                }*/
+                asm.WriteLine("\tMOV [" + v.Nombre + "], EAX");
                 v.setValor(r);
             }
             else if (Contenido == "-=")
@@ -339,14 +331,10 @@ namespace ASM
                 match("-=");
                 Expresion();
                 float valorResta = s.Pop();
-                r = v.getValor() - valorResta;
-                asm.WriteLine("\tMOV EAX, [" + v.getNombre() + "]");
+                r = v.Valor - valorResta;
+                asm.WriteLine("\tMOV EAX, [" + v.Nombre + "]");
                 asm.WriteLine("\tSUB EAX, [" + valorResta + "]");
-                asm.WriteLine("\tMOV [" + v.getNombre() + "], EAX");
-                /*if (maximoTipo > Variable.valorToTipoDato(r))
-                {
-                    throw new Error("Tipo dato. No está permitido asignar un valor " + maximoTipo + " a una variable " + Variable.valorToTipoDato(r), log, linea, columna);
-                }*/
+                asm.WriteLine("\tMOV [" + v.Nombre + "], EAX");
                 v.setValor(r);
             }
             else if (Contenido == "*=")
@@ -354,14 +342,10 @@ namespace ASM
                 match("*=");
                 Expresion();
                 float valorMul = s.Pop();
-                r = v.getValor() * valorMul;
-                asm.WriteLine("\tMOV EAX, [" + v.getNombre() + "]");
+                r = v.Valor * valorMul;
+                asm.WriteLine("\tMOV EAX, [" + v.Nombre + "]");
                 asm.WriteLine("\tMUL EAX, [" + valorMul + "]");
-                asm.WriteLine("\tMOV [" + v.getNombre() + "], EAX");
-                /*if (maximoTipo > Variable.valorToTipoDato(r))
-                {
-                    throw new Error("Tipo dato. No está permitido asignar un valor " + maximoTipo + " a una variable " + Variable.valorToTipoDato(r), log, linea, columna);
-                }*/
+                asm.WriteLine("\tMOV [" + v.Nombre + "], EAX");
                 v.setValor(r);
             }
             else if (Contenido == "/=")
@@ -369,15 +353,11 @@ namespace ASM
                 match("/=");
                 Expresion();
                 float valorDiv = s.Pop();
-                r = v.getValor() / valorDiv;
-                asm.WriteLine("\tMOV EAX, [" + v.getNombre() + "]");
+                r = v.Valor / valorDiv;
+                asm.WriteLine("\tMOV EAX, [" + v.Nombre + "]");
                 asm.WriteLine("\tIMUL EAX, [" + valorDiv + "]");
-                asm.WriteLine("\tMOV [" + v.getNombre() + "], EAX");
+                asm.WriteLine("\tMOV [" + v.Nombre + "], EAX");
                 //asm.WriteLine("    POP");
-                /*if (maximoTipo > Variable.valorToTipoDato(r))
-                {
-                    throw new Error("Tipo dato. No está permitido asignar un valor " + maximoTipo + " a una variable " + Variable.valorToTipoDato(r), log, linea, columna);
-                }*/
                 v.setValor(r);
             }
             else if (Contenido == "%=")
@@ -385,17 +365,13 @@ namespace ASM
                 match("%=");
                 Expresion();
                 float valorRes = s.Pop();
-                r = v.getValor() % valorRes;
-                asm.WriteLine("\tMOV EAX, [" + v.getNombre() + "]");
+                r = v.Valor % valorRes;
+                asm.WriteLine("\tMOV EAX, [" + v.Nombre + "]");
                 asm.WriteLine("\tMOV EBX, [" + valorRes + "]");
                 asm.WriteLine("\tXOR EDX, EDX");
                 asm.WriteLine("\tDIV EBX");
-                asm.WriteLine("\tMOV [" + v.getNombre() + "], EDX");
+                asm.WriteLine("\tMOV [" + v.Nombre + "], EDX");
                 //asm.WriteLine("    POP");
-                /*if (maximoTipo > Variable.valorToTipoDato(r))
-                {
-                    throw new Error("Tipo dato. No está permitido asignar un valor " + maximoTipo + " a una variable " + Variable.valorToTipoDato(r), log, linea, columna);
-                }*/
                 v.setValor(r);
             }
             //displayStack();
@@ -607,10 +583,10 @@ namespace ASM
             string resultado = "";
             if (Clasificacion == Tipos.Identificador)
             {
-                Variable? v = l.Find(variable => variable.getNombre() == Contenido);
+                Variable? v = l.Find(variable => variable.Nombre == Contenido);
                 if (v != null)
                 {
-                    resultado = v.getValor().ToString(); // Obtener el valor de la variable y convertirla
+                    resultado = v.Valor.ToString(); // Obtener el valor de la variable y convertirla
                 }
                 else
                 {
@@ -735,16 +711,16 @@ namespace ASM
             }
             else if (Clasificacion == Tipos.Identificador)
             {
-                Variable? v = l.Find(variable => variable.getNombre() == Contenido);
+                Variable? v = l.Find(variable => variable.Nombre == Contenido);
                 if (v == null)
                 {
                     throw new Error("Sintaxis: la variable " + Contenido + " no está definida", log, linea, columna);
                 }
-                if (maximoTipo < v.getTipoDato())
+                if (maximoTipo < v.Tipo)
                 {
-                    maximoTipo = v.getTipoDato();
+                    maximoTipo = v.Tipo;
                 }
-                s.Push(v.getValor());
+                s.Push(v.Valor);
                 asm.WriteLine("\tMOV EAX, " + "[" + Contenido + "]");
                 asm.WriteLine("\tPUSH EAX");
                 //Console.Write(Contenido + " ");

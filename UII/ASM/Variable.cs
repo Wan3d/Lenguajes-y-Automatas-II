@@ -14,7 +14,6 @@ namespace ASM
         private TipoDato tipo;
         private string nombre;
         private float valor;
-        private float valorInicial;
 
         public Variable(TipoDato tipo, string nombre, float valor = 0)
         {
@@ -52,17 +51,20 @@ namespace ASM
                 return TipoDato.Float;
             }
         }
-        public float getValor()
+        public float Valor //getValor
         {
-            return valor;
+            get { return valor; }
+            set { valor = value; }
         }
-        public string getNombre()
+        public string Nombre //getNombre
         {
-            return nombre;
+            get { return nombre; }
+            set { nombre = value; }
         }
-        public TipoDato getTipoDato()
+        public TipoDato Tipo //getTipoDato
         {
-            return tipo;
+            get { return tipo; }
+            set { tipo = value; }
         }
     }
 }

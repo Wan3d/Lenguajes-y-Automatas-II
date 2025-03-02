@@ -7,7 +7,10 @@ static void Main(string[] args)
 {
   int x26 = 200;
 
+
   x26++;
+
+  x26--;
 
   /*do {
     x26 = x26 + 1;
