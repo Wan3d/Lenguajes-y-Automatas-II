@@ -1,7 +1,17 @@
 /*
 REQUERIMIENTOS:
 1. Declarar las variables con su tipo correspondiente en Ensamblador. O sea, declararlas con su tipo de dato correspondiente (Como Char, Byte, Int)
-2.
+2. En Asignación, generar código en Ensamblador para ++(inc) & --(dec) [DONE]
+3. En Asignación, generar código en Ensamblador para +=, -=, *=, /=, %= [DONE]
+4. Generar código en Ensamblador para Console.Write y Console.WriteLine
+5. Generar código en Ensamblador para Console.Read y Console.ReadLine
+6. Programar el do While [DONE]
+7. Programar el While
+8. Programar el For
+9. Condicionar todos los setValor en Asignación | ListaIdentificadores (If (ejecuta){}) [DONE]
+10. Programar el Else
+11. Usar set y get en Variable
+12. Ajustar todos los constructores con parámetros con default [DONE]
 */
 using System;
 using System.Collections.Generic;
@@ -14,22 +24,17 @@ namespace ASM
 {
     public class Lenguaje : Sintaxis
     {
+        private int ifCounter, whileCounter, doWhileCounter, forCounter;
         Stack<float> s;
         List<Variable> l;
         Variable.TipoDato maximoTipo;
-        public Lenguaje() : base()
+        public Lenguaje(string nombre = "prueba.cpp") : base(nombre)
         {
             s = new Stack<float>();
             l = new List<Variable>();
             log.WriteLine("Constructor lenguaje");
             maximoTipo = Variable.TipoDato.Char;
-        }
-        public Lenguaje(string nombre) : base(nombre)
-        {
-            s = new Stack<float>();
-            l = new List<Variable>();
-            log.WriteLine("Constructor lenguaje");
-            maximoTipo = Variable.TipoDato.Char;
+            ifCounter = whileCounter = doWhileCounter = forCounter = 1;
         }
         private void displayStack()
         {
@@ -41,12 +46,23 @@ namespace ASM
         }
         private void displayLista()
         {
-            asm.WriteLine("SECTION .DATA");
+            asm.WriteLine("section .data");
             log.WriteLine("Lista de variables: ");
             foreach (Variable elemento in l)
             {
                 log.WriteLine($"{elemento.getNombre()} {elemento.getTipoDato()} {elemento.getValor()}");
-                asm.WriteLine($"{elemento.getNombre()} DB 0");
+                if (elemento.getTipoDato() == Variable.TipoDato.Char)
+                {
+                    asm.WriteLine($"{elemento.getNombre()} DB {elemento.getValor()}");
+                }
+                else if (elemento.getTipoDato() == Variable.TipoDato.Int)
+                {
+                    asm.WriteLine($"{elemento.getNombre()} DW {elemento.getValor()}");
+                }
+                else
+                {
+                    asm.WriteLine($"{elemento.getNombre()} DD {elemento.getValor()}");
+                }
             }
         }
         //Programa  -> Librerias? Variables? Main
@@ -58,9 +74,10 @@ namespace ASM
             }
             if (Clasificacion == Tipos.TipoDato)
             {
-                Variables();
+                Variables(true);
             }
             Main();
+            asm.WriteLine("\tRET");
             displayLista();
         }
         //Librerias -> using ListaLibrerias; Librerias?
@@ -75,7 +92,7 @@ namespace ASM
             }
         }
         //Variables -> tipo_dato Lista_identificadores; Variables?
-        private void Variables()
+        private void Variables(bool ejecuta)
         {
             Variable.TipoDato t = Variable.TipoDato.Char;
             switch (Contenido)
@@ -84,11 +101,11 @@ namespace ASM
                 case "float": t = Variable.TipoDato.Float; break;
             }
             match(Tipos.TipoDato);
-            ListaIdentificadores(t);
+            ListaIdentificadores(ejecuta, t);
             match(";");
             if (Clasificacion == Tipos.TipoDato)
             {
-                Variables();
+                Variables(true);
             }
         }
         //ListaLibrerias -> identificador (.ListaLibrerias)?
@@ -102,7 +119,7 @@ namespace ASM
             }
         }
         //ListaIdentificadores -> identificador (= Expresion)? (,ListaIdentificadores)?
-        private void ListaIdentificadores(Variable.TipoDato t)
+        private void ListaIdentificadores(bool ejecuta, Variable.TipoDato t)
         {
             if (l.Find(variable => variable.getNombre() == Contenido) != null)
             {
@@ -122,11 +139,14 @@ namespace ASM
                     {
                         match("Read");
                         int r = Console.Read();
-                        if (maximoTipo > Variable.valorToTipoDato(r))
+                        if (ejecuta)
                         {
-                            throw new Error("Tipo dato. No está permitido asignar un valor " + maximoTipo + " a una variable " + Variable.valorToTipoDato(r), log, linea, columna);
+                            if (maximoTipo > Variable.valorToTipoDato(r))
+                            {
+                                throw new Error("Tipo dato. No está permitido asignar un valor " + maximoTipo + " a una variable " + Variable.valorToTipoDato(r), log, linea, columna);
+                            }
+                            v.setValor(r);
                         }
-                        v.setValor(r);
                     }
                     else
                     {
@@ -134,11 +154,14 @@ namespace ASM
                         string? r = Console.ReadLine();
                         if (float.TryParse(r, out float valor))
                         {
-                            if (maximoTipo > Variable.valorToTipoDato(valor))
+                            if (ejecuta)
                             {
-                                throw new Error("Tipo dato. No está permitido asignar un valor " + maximoTipo + " a una variable " + Variable.valorToTipoDato(valor), log, linea, columna);
+                                if (maximoTipo > Variable.valorToTipoDato(valor))
+                                {
+                                    throw new Error("Tipo dato. No está permitido asignar un valor " + maximoTipo + " a una variable " + Variable.valorToTipoDato(valor), log, linea, columna);
+                                }
+                                v.setValor(valor);
                             }
-                            v.setValor(valor);
                         }
                         else
                         {
@@ -156,15 +179,18 @@ namespace ASM
                     Expresion();
                     //Console.WriteLine("Despues: " + maximoTipo);
                     float r = s.Pop();
-                    asm.WriteLine("    POP EAX");
-                    asm.WriteLine($"    MOV DWORD[{v.getNombre()}], EAX");
-                    v.setValor(r);
+                    asm.WriteLine("\tPOP EAX");
+                    asm.WriteLine($"\tMOV [{v.getNombre()}], EAX");
+                    if (ejecuta)
+                    {
+                        v.setValor(r);
+                    }
                 }
             }
             if (Contenido == ",")
             {
                 match(",");
-                ListaIdentificadores(t);
+                ListaIdentificadores(ejecuta, t);
             }
         }
         //BloqueInstrucciones -> { listaIntrucciones? }
@@ -206,23 +232,23 @@ namespace ASM
             }
             else if (Contenido == "while")
             {
-                While();
+                While(ejecuta);
             }
             else if (Contenido == "do")
             {
-                Do();
+                Do(ejecuta);
             }
             else if (Contenido == "for")
             {
-                For();
+                For(ejecuta);
             }
             else if (Clasificacion == Tipos.TipoDato)
             {
-                Variables();
+                Variables(ejecuta);
             }
             else
             {
-                Asignacion();
+                Asignacion(ejecuta);
                 match(";");
             }
         }
@@ -235,7 +261,7 @@ namespace ASM
         Id = Console.Read() (DONE)
         Id = Console.ReadLine() (DONE)
         */
-        private void Asignacion()
+        private void Asignacion(bool ejecuta)
         {
             // Se iniciliaza cada vez que hagamos una expresión matemática
             maximoTipo = Variable.TipoDato.Char;
@@ -251,20 +277,22 @@ namespace ASM
             {
                 match("++");
                 r = v.getValor() + 1;
-                if (maximoTipo > Variable.valorToTipoDato(r))
+                asm.WriteLine("\tINC " + v.getNombre());
+                /*if (maximoTipo > Variable.valorToTipoDato(r))
                 {
                     throw new Error("Tipo dato. No está permitido asignar un valor " + maximoTipo + " a una variable " + Variable.valorToTipoDato(r), log, linea, columna);
-                }
+                }*/
                 v.setValor(r);
             }
             else if (Contenido == "--")
             {
                 match("--");
                 r = v.getValor() - 1;
-                if (maximoTipo > Variable.valorToTipoDato(r))
+                asm.WriteLine("\tDEC " + v.getNombre());
+                /*if (maximoTipo > Variable.valorToTipoDato(r))
                 {
                     throw new Error("Tipo dato. No está permitido asignar un valor " + maximoTipo + " a una variable " + Variable.valorToTipoDato(r), log, linea, columna);
-                }
+                }*/
                 v.setValor(r);
             }
             else if (Contenido == "=")
@@ -272,77 +300,102 @@ namespace ASM
                 match("=");
                 if (Contenido == "Console")
                 {
-                    ListaIdentificadores(v.getTipoDato()); // Ya se hace este procedimiento arriba así que simplemente obtenemos a través del método lo que necesitamos
+                    ListaIdentificadores(ejecuta, v.getTipoDato()); // Ya se hace este procedimiento arriba así que simplemente obtenemos a través del método lo que necesitamos
                 }
                 else
                 {
-                    asm.WriteLine($"; Asignación de {v.getNombre()}");
+                    //asm.WriteLine($"; Asignación de {v.getNombre()}");
                     Expresion();
                     r = s.Pop();
-                    asm.WriteLine("    POP EAX");
-                    asm.WriteLine($"   MOV DWORD[{v.getNombre()}], EAX");
-                    if (maximoTipo > Variable.valorToTipoDato(r))
+                    asm.WriteLine("\tPOP EAX");
+                    asm.WriteLine($"\tMOV [{v.getNombre()}], EAX");
+                    if (ejecuta)
                     {
-                        throw new Error("Tipo dato. No está permitido asignar un valor " + maximoTipo + " a una variable " + Variable.valorToTipoDato(r), log, linea, columna);
+                        /*if (maximoTipo > Variable.valorToTipoDato(r))
+                        {
+                            throw new Error("Tipo dato. 5 No está permitido asignar un valor " + maximoTipo + " a una variable " + Variable.valorToTipoDato(r), log, linea, columna);
+                        }*/
+                        v.setValor(r);
                     }
-                    v.setValor(r);
                 }
             }
             else if (Contenido == "+=")
             {
                 match("+=");
                 Expresion();
-                r = v.getValor() + s.Pop();
-                if (maximoTipo > Variable.valorToTipoDato(r))
+                float valorSuma = s.Pop();
+                r = v.getValor() + valorSuma;
+                asm.WriteLine("\tMOV EAX, [" + v.getNombre() + "]");
+                asm.WriteLine("\tADD EAX, [" + valorSuma + "]");
+                asm.WriteLine("\tMOV [" + v.getNombre() + "], EAX");
+                /*if (maximoTipo > Variable.valorToTipoDato(r))
                 {
                     throw new Error("Tipo dato. No está permitido asignar un valor " + maximoTipo + " a una variable " + Variable.valorToTipoDato(r), log, linea, columna);
-                }
+                }*/
                 v.setValor(r);
             }
             else if (Contenido == "-=")
             {
                 match("-=");
                 Expresion();
-                r = v.getValor() - s.Pop();
-                if (maximoTipo > Variable.valorToTipoDato(r))
+                float valorResta = s.Pop();
+                r = v.getValor() - valorResta;
+                asm.WriteLine("\tMOV EAX, [" + v.getNombre() + "]");
+                asm.WriteLine("\tSUB EAX, [" + valorResta + "]");
+                asm.WriteLine("\tMOV [" + v.getNombre() + "], EAX");
+                /*if (maximoTipo > Variable.valorToTipoDato(r))
                 {
                     throw new Error("Tipo dato. No está permitido asignar un valor " + maximoTipo + " a una variable " + Variable.valorToTipoDato(r), log, linea, columna);
-                }
+                }*/
                 v.setValor(r);
             }
             else if (Contenido == "*=")
             {
                 match("*=");
                 Expresion();
-                r = v.getValor() * s.Pop();
-                if (maximoTipo > Variable.valorToTipoDato(r))
+                float valorMul = s.Pop();
+                r = v.getValor() * valorMul;
+                asm.WriteLine("\tMOV EAX, [" + v.getNombre() + "]");
+                asm.WriteLine("\tMUL EAX, [" + valorMul + "]");
+                asm.WriteLine("\tMOV [" + v.getNombre() + "], EAX");
+                /*if (maximoTipo > Variable.valorToTipoDato(r))
                 {
                     throw new Error("Tipo dato. No está permitido asignar un valor " + maximoTipo + " a una variable " + Variable.valorToTipoDato(r), log, linea, columna);
-                }
+                }*/
                 v.setValor(r);
             }
             else if (Contenido == "/=")
             {
                 match("/=");
                 Expresion();
-                r = v.getValor() / s.Pop();
+                float valorDiv = s.Pop();
+                r = v.getValor() / valorDiv;
+                asm.WriteLine("\tMOV EAX, [" + v.getNombre() + "]");
+                asm.WriteLine("\tIMUL EAX, [" + valorDiv + "]");
+                asm.WriteLine("\tMOV [" + v.getNombre() + "], EAX");
                 //asm.WriteLine("    POP");
-                if (maximoTipo > Variable.valorToTipoDato(r))
+                /*if (maximoTipo > Variable.valorToTipoDato(r))
                 {
                     throw new Error("Tipo dato. No está permitido asignar un valor " + maximoTipo + " a una variable " + Variable.valorToTipoDato(r), log, linea, columna);
-                }
+                }*/
                 v.setValor(r);
             }
             else if (Contenido == "%=")
             {
                 match("%=");
                 Expresion();
-                r = v.getValor() % s.Pop();
+                float valorRes = s.Pop();
+                r = v.getValor() % valorRes;
+                asm.WriteLine("\tMOV EAX, [" + v.getNombre() + "]");
+                asm.WriteLine("\tMOV EBX, [" + valorRes + "]");
+                asm.WriteLine("\tXOR EDX, EDX");
+                asm.WriteLine("\tDIV EBX");
+                asm.WriteLine("\tMOV [" + v.getNombre() + "], EDX");
                 //asm.WriteLine("    POP");
-                if (maximoTipo > Variable.valorToTipoDato(r))
+                /*if (maximoTipo > Variable.valorToTipoDato(r))
                 {
                     throw new Error("Tipo dato. No está permitido asignar un valor " + maximoTipo + " a una variable " + Variable.valorToTipoDato(r), log, linea, columna);
-                }
+                }*/
                 v.setValor(r);
             }
             //displayStack();
@@ -353,7 +406,9 @@ namespace ASM
         {
             match("if");
             match("(");
-            bool ejecuta = Condicion() && ejecuta2;
+            asm.WriteLine("; If");
+            string label = $"jump_if_{ifCounter++}:";
+            bool ejecuta = Condicion(label) && ejecuta2;
             //Console.WriteLine(ejecuta);
             match(")");
             if (Contenido == "{")
@@ -364,6 +419,9 @@ namespace ASM
             {
                 Instruccion(ejecuta);
             }
+
+            asm.WriteLine(label);
+
             if (Contenido == "else")
             {
                 match("else");
@@ -379,82 +437,127 @@ namespace ASM
             }
         }
         //Condicion -> Expresion operadorRelacional Expresion
-        private bool Condicion()
+        private bool Condicion(string label, bool isDoWhile = false)
         {
+            asm.WriteLine("; Expresión 1");
             maximoTipo = Variable.TipoDato.Char;
             Expresion();
             float valor1 = s.Pop();
-            asm.WriteLine("    POP");
             string operador = Contenido;
             match(Tipos.OperadorRelacional);
             maximoTipo = Variable.TipoDato.Char;
+            asm.WriteLine("; Expresión 2");
             Expresion();
             float valor2 = s.Pop();
-            asm.WriteLine("    POP");
-            switch (operador)
+            asm.WriteLine("\tPOP EBX");
+            asm.WriteLine("\tPOP EAX");
+            asm.WriteLine("\tCMP EAX, EBX");
+            if (!isDoWhile)
             {
-                case ">": return valor1 > valor2;
-                case ">=": return valor1 >= valor2;
-                case "<": return valor1 < valor2;
-                case "<=": return valor1 <= valor2;
-                case "==": return valor1 == valor2;
-                default: return valor1 != valor2;
-            }
-        }
-        //While -> while(Condicion) bloqueInstrucciones | instruccion
-        private void While()
-        {
-            match("while");
-            match("(");
-            Condicion();
-            match(")");
-            if (Contenido == "{")
-            {
-                BloqueInstrucciones(true);
+                switch (operador)
+                {
+                    case ">":
+                        asm.WriteLine($"\tJNA {label.Replace(":", string.Empty)}");
+                        return valor1 > valor2;
+                    case ">=":
+                        asm.WriteLine($"\tJB {label.Replace(":", string.Empty)}");
+                        return valor1 >= valor2;
+                    case "<":
+                        asm.WriteLine($"\tJAE {label.Replace(":", string.Empty)}");
+                        return valor1 < valor2;
+                    case "<=":
+                        asm.WriteLine($"\tJA {label.Replace(":", string.Empty)}");
+                        return valor1 <= valor2;
+                    case "==":
+                        asm.WriteLine($"\tJNE {label.Replace(":", string.Empty)}");
+                        return valor1 == valor2;
+                    default:
+                        asm.WriteLine($"\tJE {label.Replace(":", string.Empty)}");
+                        return valor1 != valor2;
+                }
             }
             else
             {
-                Instruccion(true);
+                switch (operador)
+                {
+                    case ">":
+                        asm.WriteLine($"\tJA {label.Replace(":", string.Empty)}");
+                        return valor1 > valor2;
+                    case ">=":
+                        asm.WriteLine($"\tJAE {label.Replace(":", string.Empty)}");
+                        return valor1 >= valor2;
+                    case "<":
+                        asm.WriteLine($"\tJB {label.Replace(":", string.Empty)}");
+                        return valor1 < valor2;
+                    case "<=":
+                        asm.WriteLine($"\tJBE {label.Replace(":", string.Empty)}");
+                        return valor1 <= valor2;
+                    case "==":
+                        asm.WriteLine($"\tJE {label.Replace(":", string.Empty)}");
+                        return valor1 == valor2;
+                    default:
+                        asm.WriteLine($"\tJNE {label.Replace(":", string.Empty)}");
+                        return valor1 != valor2;
+                }
+            }
+        }
+        //While -> while(Condicion) bloqueInstrucciones | instruccion
+        private void While(bool ejecuta)
+        {
+            match("while");
+            match("(");
+            Condicion("");
+            match(")");
+            if (Contenido == "{")
+            {
+                BloqueInstrucciones(ejecuta);
+            }
+            else
+            {
+                Instruccion(ejecuta);
             }
         }
         /*Do -> do bloqueInstrucciones | intruccion 
         while(Condicion);*/
-        private void Do()
+        private void Do(bool ejecuta)
         {
             match("do");
+            asm.WriteLine("; Do");
+            string label = $"jump_do_{doWhileCounter++}:";
+            asm.WriteLine(label);
             if (Contenido == "{")
             {
-                BloqueInstrucciones(true);
+                BloqueInstrucciones(ejecuta);
             }
             else
             {
-                Instruccion(true);
+                Instruccion(ejecuta);
             }
             match("while");
             match("(");
-            Condicion();
+            Condicion(label, true);
             match(")");
             match(";");
         }
         /*For -> for(Asignacion; Condicion; Asignacion) 
         BloqueInstrucciones | Intruccion*/
-        private void For()
+        private void For(bool ejecuta)
         {
             match("for");
             match("(");
-            Asignacion();
+            Asignacion(ejecuta);
             match(";");
-            Condicion();
+            Condicion("");
             match(";");
-            Asignacion();
+            Asignacion(ejecuta);
             match(")");
             if (Contenido == "{")
             {
-                BloqueInstrucciones(true);
+                BloqueInstrucciones(ejecuta);
             }
             else
             {
-                Instruccion(true);
+                Instruccion(ejecuta);
             }
         }
         //Console -> Console.(WriteLine|Write) (cadena? concatenaciones?);
@@ -557,22 +660,21 @@ namespace ASM
                 Termino();
                 //Console.Write(operador + " ");
                 float n1 = s.Pop();
-                asm.WriteLine("    POP EBX");
+                asm.WriteLine("\tPOP EBX");
                 float n2 = s.Pop();
-                asm.WriteLine("    POP EAX");
+                asm.WriteLine("\tPOP EAX");
                 switch (operador)
                 {
                     case "+":
                         s.Push(n2 + n1);
-                        asm.WriteLine("    ADD EAX, EBX");
-                        asm.WriteLine("    PUSH EAX");
+                        asm.WriteLine("\tADD EAX, EBX");
+                        asm.WriteLine("\tPUSH EAX");
                         break;
                     case "-":
                         s.Push(n2 - n1);
-                        asm.WriteLine("    SUB EAX, EBX");
-                        asm.WriteLine("    PUSH EAX");
+                        asm.WriteLine("\tSUB EAX, EBX");
+                        asm.WriteLine("\tPUSH EAX");
                         break;
-
                 }
             }
         }
@@ -592,25 +694,25 @@ namespace ASM
                 Factor();
                 //Console.Write(operador + " ");
                 float n1 = s.Pop();
-                asm.WriteLine("    POP EBX");
+                asm.WriteLine("\tPOP EBX");
                 float n2 = s.Pop();
-                asm.WriteLine("    POP EAX");
+                asm.WriteLine("\tPOP EAX");
                 switch (operador)
                 {
                     case "*":
                         s.Push(n2 * n1);
-                        asm.WriteLine("    MUL EBX");
-                        asm.WriteLine("    PUSH AX");
+                        asm.WriteLine("\tMUL EBX");
+                        asm.WriteLine("\tPUSH EAX");
                         break;
                     case "/":
                         s.Push(n2 / n1);
-                        asm.WriteLine("    DIV EBX");
-                        asm.WriteLine("    PUSH EAX");
+                        asm.WriteLine("\tDIV EBX");
+                        asm.WriteLine("\tPUSH EAX");
                         break;
                     case "%":
                         s.Push(n2 % n1);
-                        asm.WriteLine("    DIV EBX");
-                        asm.WriteLine("    PUSH EDX");
+                        asm.WriteLine("\tDIV EBX");
+                        asm.WriteLine("\tPUSH EDX");
                         break;
                 }
             }
@@ -626,8 +728,8 @@ namespace ASM
                     maximoTipo = Variable.valorToTipoDato(float.Parse(Contenido));
                 }
                 s.Push(float.Parse(Contenido));
-                asm.WriteLine("    MOV EAX, " + Contenido);
-                asm.WriteLine("    PUSH AX");
+                asm.WriteLine("\tMOV EAX, " + "[" + Contenido + "]");
+                asm.WriteLine("\tPUSH EAX");
                 //Console.Write(Contenido + " ");
                 match(Tipos.Numero);
             }
@@ -643,8 +745,8 @@ namespace ASM
                     maximoTipo = v.getTipoDato();
                 }
                 s.Push(v.getValor());
-                asm.WriteLine("     MOV EAX, " + Contenido);
-                asm.WriteLine("     PUSH EAX");
+                asm.WriteLine("\tMOV EAX, " + "[" + Contenido + "]");
+                asm.WriteLine("\tPUSH EAX");
                 //Console.Write(Contenido + " ");
                 match(Tipos.Identificador);
             }
@@ -670,14 +772,14 @@ namespace ASM
                 {
                     maximoTipo = tipoCasteo;
                     float r = s.Pop();
-                    asm.WriteLine("    POP");
+                    asm.WriteLine("\tPOP");
                     switch (tipoCasteo)
                     {
                         case Variable.TipoDato.Int: r = (r % 65536); break;
                         case Variable.TipoDato.Char: r = (r % 256); break;
                     }
                     s.Push(r);
-                    asm.WriteLine("    PUSH");
+                    asm.WriteLine("\tPUSH");
                 }
                 match(")");
             }

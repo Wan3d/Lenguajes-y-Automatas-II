@@ -80,11 +80,11 @@ namespace ASM
                     //Comentarios de Ensamblador
                     asm.WriteLine("; Archivo: " + nombreArchivo);
                     asm.WriteLine("; Fecha y hora: " + ahora.ToString());
-                    asm.WriteLine(";----------------------------------");
+                    asm.WriteLine("; ----------------------------------");
                     //Encabezado de Ensamblador
-                    asm.WriteLine("SEGMENT .TEXT");
-                    asm.WriteLine("GLOBAL MAIN");
-                    asm.WriteLine("MAIN:");
+                    asm.WriteLine("segment .text");
+                    asm.WriteLine("global main");
+                    asm.WriteLine("main:");
                 }
                 else
                 {
@@ -102,7 +102,6 @@ namespace ASM
             log.Close();
             asm.Close();
         }
-
         private int Columna(char c)
         {
             //int columna;

@@ -11,9 +11,10 @@ namespace ASM
         {
             Char, Int, Float
         }
-        TipoDato tipo;
-        string nombre;
-        float valor;
+        private TipoDato tipo;
+        private string nombre;
+        private float valor;
+        private float valorInicial;
 
         public Variable(TipoDato tipo, string nombre, float valor = 0)
         {
