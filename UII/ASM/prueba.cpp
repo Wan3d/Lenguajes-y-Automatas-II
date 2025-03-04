@@ -5,12 +5,75 @@ using System.Threading.Tasks;
 
 static void Main(string[] args)
 {
-  int x26 = 200;
+    int altura;
+    altura = Console.ReadLine();
+    Console.WriteLine(altura);
+    /*int altura,i,j;
+    char x=0, y=10, z=2;
+    char c;
 
+    //c = (100+200);
+    c = (char) (100+200);
+
+    Console.WriteLine("Valor de altura = ");
+    altura = Console.ReadLine();
+
+    x = (3 + altura) * 8 - (10 - 4) / 2; // = 61
+    x--;
+    x+=(altura*8);
+    x*=2;
+    x/=(y-6);
+
+    for (i = 1; i<=altura; i++)
+    {
+        for (j = 1; j<=i; j++)
+        {
+            if (j%2==0)
+                Console.Write("*");
+            else
+                Console.Write("-");
+        }
+        Console.WriteLine("");
+    }
+    i = 0;
+    do
+    {
+        Console.Write("-");
+        i++;
+    }
+    while (i<altura*2);
+    Console.WriteLine("");
+    for (i = 1; i<=altura; i++)
+    {
+        j = 1;
+        while (j<=i)
+        { 
+            Console.Write(""+j);
+            j++;
+        }
+        Console.WriteLine("");
+    }
+    i = 0;
+    do
+    {
+        Console.Write("-");
+        i++;
+    }
+    while (i<altura*2);
+    Console.WriteLine("");*/
+}
+
+  
+
+  /*int x26 = 200;
+
+  char hola;
+
+  float adio;
 
   x26++;
 
-  x26--;
+  x26--;*/
 
   /*do {
     x26 = x26 + 1;
@@ -90,4 +153,3 @@ static void Main(string[] args)
   e = e + h;         // Bien
   e = (char)(e + h); // Bien*()
   */
-}

@@ -51,18 +51,7 @@ namespace ASM
             foreach (Variable elemento in l)
             {
                 log.WriteLine($"{elemento.Nombre} {elemento.Tipo} {elemento.Valor}");
-                if (elemento.Tipo == Variable.TipoDato.Char)
-                {
-                    asm.WriteLine($"{elemento.Nombre} DB {elemento.Valor}");
-                }
-                else if (elemento.Tipo == Variable.TipoDato.Int)
-                {
-                    asm.WriteLine($"{elemento.Nombre} DW {elemento.Valor}");
-                }
-                else
-                {
-                    asm.WriteLine($"{elemento.Nombre} DD {elemento.Valor}");
-                }
+                asm.WriteLine($"{elemento.Nombre} DD {elemento.Valor}");
             }
         }
         //Programa  -> Librerias? Variables? Main
@@ -138,6 +127,7 @@ namespace ASM
                     if (Contenido == "Read")
                     {
                         match("Read");
+                        match("(");
                         int r = Console.Read();
                         if (ejecuta)
                         {
@@ -151,9 +141,11 @@ namespace ASM
                     else
                     {
                         match("ReadLine");
+                        match("(");
                         string? r = Console.ReadLine();
                         if (float.TryParse(r, out float valor))
                         {
+                            //asm.WriteLine("\tPUSH");
                             if (ejecuta)
                             {
                                 if (maximoTipo > Variable.valorToTipoDato(valor))
@@ -168,7 +160,6 @@ namespace ASM
                             throw new Error("Sintaxis. No se ingresó un número ", log, linea, columna);
                         }
                     }
-                    match("(");
                     match(")");
                 }
                 else
@@ -261,12 +252,12 @@ namespace ASM
         Id = Console.Read() (DONE)
         Id = Console.ReadLine() (DONE)
         */
-        private void Asignacion(bool ejecuta)
+        private void Asignacion(bool ejecuta, Variable? v = null)
         {
             // Se iniciliaza cada vez que hagamos una expresión matemática
             maximoTipo = Variable.TipoDato.Char;
             float r;
-            Variable? v = l.Find(variable => variable.Nombre == Contenido);
+            v = l.Find(variable => variable.Nombre == Contenido);
             if (v == null)
             {
                 throw new Error("Sintaxis: La variable " + Contenido + " no está definida", log, linea, columna);
@@ -296,7 +287,32 @@ namespace ASM
                 match("=");
                 if (Contenido == "Console")
                 {
-                    ListaIdentificadores(ejecuta, v.Tipo); // Ya se hace este procedimiento arriba así que simplemente obtenemos a través del método lo que necesitamos
+                    match("Console");
+                    match(".");
+                    if (Contenido == "Read")
+                    {
+                        match("Read");
+                        match("(");
+                        Console.Read();
+                    }
+                    else
+                    {
+                        match("ReadLine");
+                        match("(");
+                        string? line = Console.ReadLine();
+                        if (float.TryParse(line, out float numero))
+                        {
+                            if (ejecuta)
+                            {
+                                if (maximoTipo > Variable.valorToTipoDato(numero))
+                                {
+                                    throw new Error("Tipo dato. No está permitido asignar un valor " + maximoTipo + " a una variable " + Variable.valorToTipoDato(numero), log, linea, columna);
+                                }
+                                v.setValor(numero);
+                            }
+                        }
+                    }
+                    match(")");
                 }
                 else
                 {
@@ -307,10 +323,10 @@ namespace ASM
                     asm.WriteLine($"\tMOV [{v.Nombre}], EAX");
                     if (ejecuta)
                     {
-                        /*if (maximoTipo > Variable.valorToTipoDato(r))
+                        if (maximoTipo > Variable.valorToTipoDato(r))
                         {
                             throw new Error("Tipo dato. 5 No está permitido asignar un valor " + maximoTipo + " a una variable " + Variable.valorToTipoDato(r), log, linea, columna);
-                        }*/
+                        }
                         v.setValor(r);
                     }
                 }
@@ -401,7 +417,7 @@ namespace ASM
             if (Contenido == "else")
             {
                 match("else");
-                bool ejecutarElse = !ejecuta; // Solo se ejecuta el else si el if no se ejecutó
+                bool ejecutarElse = !ejecuta && ejecuta2; // Solo se ejecuta el else si el if no se ejecutó
                 if (Contenido == "{")
                 {
                     BloqueInstrucciones(ejecutarElse);
@@ -540,8 +556,11 @@ namespace ASM
         private void console(bool ejecuta)
         {
             bool isWriteLine = false;
+            string concatenaciones = "";
+
             match("Console");
             match(".");
+
             if (Contenido == "WriteLine")
             {
                 match("WriteLine");
@@ -551,20 +570,36 @@ namespace ASM
             {
                 match("Write");
             }
+
             match("(");
-            string concatenaciones = "";
+
             if (Clasificacion == Tipos.Cadena)
             {
                 concatenaciones = Contenido.Trim('"');
                 match(Tipos.Cadena);
             }
+            else
+            {
+                Variable? v = l.Find(var => var.Nombre == Contenido);
+                if (v == null)
+                {
+                    throw new Error("Sintaxis: La variable " + Contenido + " no está definida", log, linea, columna);
+                }
+                else
+                {
+                    concatenaciones = v.Valor.ToString();
+                    match(Tipos.Identificador);
+                }
+            }
+
             if (Contenido == "+")
             {
-                match("+");
-                concatenaciones += Concatenaciones();  // Se acumula el resultado de las concatenaciones
+                concatenaciones += Concatenaciones();
             }
+
             match(")");
             match(";");
+
             if (ejecuta)
             {
                 if (isWriteLine)
@@ -577,6 +612,7 @@ namespace ASM
                 }
             }
         }
+
         // Concatenaciones -> Identificador|Cadena ( + concatenaciones )?
         private string Concatenaciones()
         {
