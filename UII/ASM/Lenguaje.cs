@@ -3,8 +3,8 @@ REQUERIMIENTOS:
 1. Declarar las variables con su tipo correspondiente en Ensamblador. O sea, declararlas con su tipo de dato correspondiente (Como Char, Byte, Int) [DONE]
 2. En Asignación, generar código en Ensamblador para ++(inc) & --(dec) [DONE]
 3. En Asignación, generar código en Ensamblador para +=, -=, *=, /=, %= [DONE]
-4. Generar código en Ensamblador para Console.Write y Console.WriteLine
-5. Generar código en Ensamblador para Console.Read y Console.ReadLine
+4. Generar código en Ensamblador para Console.Write y Console.WriteLine [DONE]
+5. Generar código en Ensamblador para Console.Read y Console.ReadLine [%]
 6. Programar el do While [DONE]
 7. Programar el While
 8. Programar el For
@@ -51,7 +51,7 @@ namespace ASM
             foreach (Variable elemento in l)
             {
                 log.WriteLine($"{elemento.Nombre} {elemento.Tipo} {elemento.Valor}");
-                asm.WriteLine($"{elemento.Nombre} DD {elemento.Valor}");
+                asm.WriteLine($"{elemento.Nombre} DD 0");
             }
         }
         //Programa  -> Librerias? Variables? Main
@@ -129,6 +129,7 @@ namespace ASM
                         match("Read");
                         match("(");
                         int r = Console.Read();
+                        asm.WriteLine($"\tGET_CHAR mensaje, 255");
                         if (ejecuta)
                         {
                             if (maximoTipo > Variable.valorToTipoDato(r))
@@ -143,6 +144,7 @@ namespace ASM
                         match("ReadLine");
                         match("(");
                         string? r = Console.ReadLine();
+                        asm.WriteLine($"\tGET_STRING \"{r}\", 255");
                         if (float.TryParse(r, out float valor))
                         {
                             //asm.WriteLine("\tPUSH");
@@ -268,18 +270,18 @@ namespace ASM
             {
                 match("++");
                 r = v.Valor + 1;
-                asm.WriteLine("\tMOV AL, [" + v.Nombre + "]");
+                asm.WriteLine($"\tMOV AL, [{v.Nombre}]");
                 asm.WriteLine("\tINC AL");
-                asm.WriteLine("\tMOV [" + v.Nombre + "], AL");
+                asm.WriteLine($"\tMOV [{v.Nombre}], AL");
                 v.setValor(r);
             }
             else if (Contenido == "--")
             {
                 match("--");
                 r = v.Valor - 1;
-                asm.WriteLine("\tMOV AL, [" + v.Nombre + "]");
+                asm.WriteLine($"\tMOV AL, [{v.Nombre}]");
                 asm.WriteLine("\tDEC AL");
-                asm.WriteLine("\tMOV [" + v.Nombre + "], AL");
+                asm.WriteLine($"\tMOV [{v.Nombre}], AL");
                 v.setValor(r);
             }
             else if (Contenido == "=")
@@ -294,12 +296,14 @@ namespace ASM
                         match("Read");
                         match("(");
                         Console.Read();
+                        asm.WriteLine("\tGET_CHAR");
                     }
                     else
                     {
                         match("ReadLine");
                         match("(");
                         string? line = Console.ReadLine();
+                        asm.WriteLine($"\tGET_STRING \"{line}\", 255");
                         if (float.TryParse(line, out float numero))
                         {
                             if (ejecuta)
@@ -323,10 +327,10 @@ namespace ASM
                     asm.WriteLine($"\tMOV [{v.Nombre}], EAX");
                     if (ejecuta)
                     {
-                        if (maximoTipo > Variable.valorToTipoDato(r))
+                        /*if (maximoTipo > Variable.valorToTipoDato(r))
                         {
-                            throw new Error("Tipo dato. 5 No está permitido asignar un valor " + maximoTipo + " a una variable " + Variable.valorToTipoDato(r), log, linea, columna);
-                        }
+                            throw new Error("Tipo dato. No está permitido asignar un valor " + maximoTipo + " a una variable " + Variable.valorToTipoDato(r), log, linea, columna);
+                        }*/
                         v.setValor(r);
                     }
                 }
@@ -337,9 +341,10 @@ namespace ASM
                 Expresion();
                 float valorSuma = s.Pop();
                 r = v.Valor + valorSuma;
-                asm.WriteLine("\tMOV EAX, [" + v.Nombre + "]");
-                asm.WriteLine("\tADD EAX, [" + valorSuma + "]");
-                asm.WriteLine("\tMOV [" + v.Nombre + "], EAX");
+                asm.WriteLine($"\tMOV EAX, [{v.Nombre}]");
+                asm.WriteLine($"\tADD EAX, {valorSuma}");
+                asm.WriteLine($"\tMOV [{v.Nombre}], EAX");
+                //asm.WriteLine("\tPOP EAX");
                 v.setValor(r);
             }
             else if (Contenido == "-=")
@@ -348,9 +353,10 @@ namespace ASM
                 Expresion();
                 float valorResta = s.Pop();
                 r = v.Valor - valorResta;
-                asm.WriteLine("\tMOV EAX, [" + v.Nombre + "]");
-                asm.WriteLine("\tSUB EAX, [" + valorResta + "]");
-                asm.WriteLine("\tMOV [" + v.Nombre + "], EAX");
+                asm.WriteLine($"\tMOV EAX, [{v.Nombre}]");
+                asm.WriteLine($"\tADD EAX, {valorResta}");
+                asm.WriteLine($"\tMOV [{v.Nombre}], EAX");
+                //asm.WriteLine("\tPOP EAX");
                 v.setValor(r);
             }
             else if (Contenido == "*=")
@@ -359,9 +365,10 @@ namespace ASM
                 Expresion();
                 float valorMul = s.Pop();
                 r = v.Valor * valorMul;
-                asm.WriteLine("\tMOV EAX, [" + v.Nombre + "]");
-                asm.WriteLine("\tMUL EAX, [" + valorMul + "]");
-                asm.WriteLine("\tMOV [" + v.Nombre + "], EAX");
+                asm.WriteLine($"\tMOV EAX, [{v.Nombre}]");
+                asm.WriteLine($"\tMUL EAX, {valorMul}");
+                asm.WriteLine($"\tMOV [{v.Nombre}], EAX");
+                //asm.WriteLine("\tPOP EAX");
                 v.setValor(r);
             }
             else if (Contenido == "/=")
@@ -370,24 +377,26 @@ namespace ASM
                 Expresion();
                 float valorDiv = s.Pop();
                 r = v.Valor / valorDiv;
-                asm.WriteLine("\tMOV EAX, [" + v.Nombre + "]");
-                asm.WriteLine("\tIMUL EAX, [" + valorDiv + "]");
-                asm.WriteLine("\tMOV [" + v.Nombre + "], EAX");
-                //asm.WriteLine("    POP");
+                asm.WriteLine($"\tMOV EAX, [{v.Nombre}]");
+                asm.WriteLine($"\tMOV EDX, 0");
+                asm.WriteLine($"\tMOV ECX, {valorDiv}");
+                asm.WriteLine($"\tDIV ECX");
+                asm.WriteLine($"\tMOV [{v.Nombre}], EAX");
+                //asm.WriteLine("\tPOP EAX");
                 v.setValor(r);
             }
             else if (Contenido == "%=")
             {
                 match("%=");
                 Expresion();
-                float valorRes = s.Pop();
-                r = v.Valor % valorRes;
-                asm.WriteLine("\tMOV EAX, [" + v.Nombre + "]");
-                asm.WriteLine("\tMOV EBX, [" + valorRes + "]");
+                int valorRes = (int)s.Pop(); // Se asegura que valorRes sea un entero para no causar problemas en Ensamblador
+                r = (int)v.Valor % valorRes;
+                asm.WriteLine($"\tMOV EAX, [{v.Nombre}]");
+                asm.WriteLine($"\tMOV EBX, {valorRes}");
                 asm.WriteLine("\tXOR EDX, EDX");
                 asm.WriteLine("\tDIV EBX");
-                asm.WriteLine("\tMOV [" + v.Nombre + "], EDX");
-                //asm.WriteLine("    POP");
+                asm.WriteLine($"\tMOV [{v.Nombre}], EDX");
+                //asm.WriteLine("\tPOP EAX");
                 v.setValor(r);
             }
             //displayStack();
@@ -605,10 +614,13 @@ namespace ASM
                 if (isWriteLine)
                 {
                     Console.WriteLine(concatenaciones);
+                    asm.WriteLine($"\tPRINT_STRING \"{concatenaciones}\"");
+                    asm.WriteLine("\tNEWLINE");
                 }
                 else
                 {
                     Console.Write(concatenaciones);
+                    asm.WriteLine($"\tPRINT_STRING \"{concatenaciones}\"");
                 }
             }
         }
@@ -740,7 +752,7 @@ namespace ASM
                     maximoTipo = Variable.valorToTipoDato(float.Parse(Contenido));
                 }
                 s.Push(float.Parse(Contenido));
-                asm.WriteLine("\tMOV EAX, " + "[" + Contenido + "]");
+                asm.WriteLine($"\tMOV EAX, {Contenido}");
                 asm.WriteLine("\tPUSH EAX");
                 //Console.Write(Contenido + " ");
                 match(Tipos.Numero);
@@ -757,7 +769,7 @@ namespace ASM
                     maximoTipo = v.Tipo;
                 }
                 s.Push(v.Valor);
-                asm.WriteLine("\tMOV EAX, " + "[" + Contenido + "]");
+                asm.WriteLine($"\tMOV EAX, {Contenido}");
                 asm.WriteLine("\tPUSH EAX");
                 //Console.Write(Contenido + " ");
                 match(Tipos.Identificador);
