@@ -5,12 +5,20 @@ using System.Threading.Tasks;
 
 static void Main(string[] args)
 {
-  int x = 10;
-  do{
+  int x = 5;
+  int i;
+  for(i = 1; x < 10; i++){
     x++;
-    Console.WriteLine(x);
-  } while(x < 13);
+  }
+  for(i = 1; x < 10; i++){
+    x++;
+  }
 
+
+  /*int x;
+  x = Console.ReadLine();
+  int y = 1;
+  Console.WriteLine(x + "" + y);*/
 }
   
 

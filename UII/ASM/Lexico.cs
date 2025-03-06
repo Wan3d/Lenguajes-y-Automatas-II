@@ -81,6 +81,7 @@ readonly int[,] TRAND = {
                     asm.WriteLine("; Archivo: " + nombreArchivo);
                     asm.WriteLine("; Fecha y hora: " + ahora.ToString());
                     asm.WriteLine("; ----------------------------------");
+                    asm.WriteLine("%include \"io.inc\"");
                     //Encabezado de Ensamblador
                     asm.WriteLine("segment .text");
                     asm.WriteLine("global main");

@@ -6,8 +6,8 @@ REQUERIMIENTOS:
 4. Generar código en Ensamblador para Console.Write y Console.WriteLine [DONE]
 5. Generar código en Ensamblador para Console.Read y Console.ReadLine [%]
 6. Programar el do While [DONE]
-7. Programar el While
-8. Programar el For
+7. Programar el While [DONE]
+8. Programar el For [DONE]
 9. Condicionar todos los setValor en Asignación | ListaIdentificadores (If (ejecuta){}) [DONE]
 10. Programar el Else
 11. Usar set y get en Variable [DONE]
@@ -129,7 +129,7 @@ namespace ASM
                         match("Read");
                         match("(");
                         int r = Console.Read();
-                        asm.WriteLine($"\tGET_CHAR mensaje, 255");
+                        asm.WriteLine($"\tGET_DEC 4, {v.Nombre}");
                         if (ejecuta)
                         {
                             if (maximoTipo > Variable.valorToTipoDato(r))
@@ -144,7 +144,7 @@ namespace ASM
                         match("ReadLine");
                         match("(");
                         string? r = Console.ReadLine();
-                        asm.WriteLine($"\tGET_STRING \"{r}\", 255");
+                        asm.WriteLine($"\tGET_DEC 4, {v.Nombre}");
                         if (float.TryParse(r, out float valor))
                         {
                             //asm.WriteLine("\tPUSH");
@@ -173,7 +173,7 @@ namespace ASM
                     //Console.WriteLine("Despues: " + maximoTipo);
                     float r = s.Pop();
                     asm.WriteLine("\tPOP EAX");
-                    asm.WriteLine($"\tMOV [{v.Nombre}], EAX");
+                    asm.WriteLine($"\tMOV DWORD[{v.Nombre}], EAX");
                     if (ejecuta)
                     {
                         v.setValor(r);
@@ -270,18 +270,18 @@ namespace ASM
             {
                 match("++");
                 r = v.Valor + 1;
-                asm.WriteLine($"\tMOV AL, [{v.Nombre}]");
-                asm.WriteLine("\tINC AL");
-                asm.WriteLine($"\tMOV [{v.Nombre}], AL");
+                asm.WriteLine($"\tMOV EAX, DWORD[{v.Nombre}]");
+                asm.WriteLine("\tINC EAX");
+                asm.WriteLine($"\tMOV DWORD[{v.Nombre}], EAX");
                 v.setValor(r);
             }
             else if (Contenido == "--")
             {
                 match("--");
                 r = v.Valor - 1;
-                asm.WriteLine($"\tMOV AL, [{v.Nombre}]");
-                asm.WriteLine("\tDEC AL");
-                asm.WriteLine($"\tMOV [{v.Nombre}], AL");
+                asm.WriteLine($"\tMOV EAX, DWORD[{v.Nombre}]");
+                asm.WriteLine("\tDEC EAX");
+                asm.WriteLine($"\tMOV DWORD[{v.Nombre}], EAX");
                 v.setValor(r);
             }
             else if (Contenido == "=")
@@ -295,15 +295,24 @@ namespace ASM
                     {
                         match("Read");
                         match("(");
-                        Console.Read();
-                        asm.WriteLine("\tGET_CHAR");
+                        int valorLeido = Console.Read();
+                        asm.WriteLine($"\tGET_DEC 4, {v.Nombre}");
+                        if (ejecuta)
+                        {
+                            if (maximoTipo > Variable.valorToTipoDato(valorLeido))
+                            {
+                                throw new Error("Tipo dato. No está permitido asignar un valor " + maximoTipo + " a una variable " + Variable.valorToTipoDato(valorLeido), log, linea, columna);
+                            }
+                            v.setValor(valorLeido);
+                        }
                     }
                     else
                     {
                         match("ReadLine");
                         match("(");
                         string? line = Console.ReadLine();
-                        asm.WriteLine($"\tGET_STRING \"{line}\", 255");
+                        asm.WriteLine($"\tGET_DEC 4, {v.Nombre}");
+
                         if (float.TryParse(line, out float numero))
                         {
                             if (ejecuta)
@@ -324,7 +333,7 @@ namespace ASM
                     Expresion();
                     r = s.Pop();
                     asm.WriteLine("\tPOP EAX");
-                    asm.WriteLine($"\tMOV [{v.Nombre}], EAX");
+                    asm.WriteLine($"\tMOV DWORD[{v.Nombre}], EAX"); //CORREGIR
                     if (ejecuta)
                     {
                         /*if (maximoTipo > Variable.valorToTipoDato(r))
@@ -341,9 +350,9 @@ namespace ASM
                 Expresion();
                 float valorSuma = s.Pop();
                 r = v.Valor + valorSuma;
-                asm.WriteLine($"\tMOV EAX, [{v.Nombre}]");
+                asm.WriteLine($"\tMOV EAX, DWORD[{v.Nombre}]");
                 asm.WriteLine($"\tADD EAX, {valorSuma}");
-                asm.WriteLine($"\tMOV [{v.Nombre}], EAX");
+                asm.WriteLine($"\tMOV DWORD[{v.Nombre}], EAX");
                 //asm.WriteLine("\tPOP EAX");
                 v.setValor(r);
             }
@@ -353,21 +362,23 @@ namespace ASM
                 Expresion();
                 float valorResta = s.Pop();
                 r = v.Valor - valorResta;
-                asm.WriteLine($"\tMOV EAX, [{v.Nombre}]");
-                asm.WriteLine($"\tADD EAX, {valorResta}");
-                asm.WriteLine($"\tMOV [{v.Nombre}], EAX");
+                asm.WriteLine($"\tMOV EAX, DWORD[{v.Nombre}]");
+                asm.WriteLine($"\tSUB EAX, {valorResta}");
+                asm.WriteLine($"\tMOV DWORD[{v.Nombre}], EAX");
                 //asm.WriteLine("\tPOP EAX");
                 v.setValor(r);
             }
             else if (Contenido == "*=")
             {
+                //CORREGIR
                 match("*=");
                 Expresion();
                 float valorMul = s.Pop();
                 r = v.Valor * valorMul;
-                asm.WriteLine($"\tMOV EAX, [{v.Nombre}]");
-                asm.WriteLine($"\tMUL EAX, {valorMul}");
-                asm.WriteLine($"\tMOV [{v.Nombre}], EAX");
+                asm.WriteLine($"\tMOV EAX, DWORD[{v.Nombre}]"); // Cargar el valor a la variable
+                asm.WriteLine($"\tMOV EBX, {valorMul}"); // Se mueve el valor del multiplicador
+                asm.WriteLine($"\tMUL EBX"); // Se multiplica el multiplicador por el registro anterior
+                asm.WriteLine($"\tMOV DWORD[{v.Nombre}], EAX"); // Se guarda el resultado en la variable
                 //asm.WriteLine("\tPOP EAX");
                 v.setValor(r);
             }
@@ -377,11 +388,11 @@ namespace ASM
                 Expresion();
                 float valorDiv = s.Pop();
                 r = v.Valor / valorDiv;
-                asm.WriteLine($"\tMOV EAX, [{v.Nombre}]");
+                asm.WriteLine($"\tMOV EAX, DWORD[{v.Nombre}]");
                 asm.WriteLine($"\tMOV EDX, 0");
                 asm.WriteLine($"\tMOV ECX, {valorDiv}");
                 asm.WriteLine($"\tDIV ECX");
-                asm.WriteLine($"\tMOV [{v.Nombre}], EAX");
+                asm.WriteLine($"\tMOV DWORD[{v.Nombre}], EAX");
                 //asm.WriteLine("\tPOP EAX");
                 v.setValor(r);
             }
@@ -391,11 +402,11 @@ namespace ASM
                 Expresion();
                 int valorRes = (int)s.Pop(); // Se asegura que valorRes sea un entero para no causar problemas en Ensamblador
                 r = (int)v.Valor % valorRes;
-                asm.WriteLine($"\tMOV EAX, [{v.Nombre}]");
+                asm.WriteLine($"\tMOV EAX, DWORD[{v.Nombre}]");
                 asm.WriteLine($"\tMOV EBX, {valorRes}");
                 asm.WriteLine("\tXOR EDX, EDX");
                 asm.WriteLine("\tDIV EBX");
-                asm.WriteLine($"\tMOV [{v.Nombre}], EDX");
+                asm.WriteLine($"\tMOV DWORD[{v.Nombre}], EDX");
                 //asm.WriteLine("\tPOP EAX");
                 v.setValor(r);
             }
@@ -500,14 +511,18 @@ namespace ASM
                         asm.WriteLine($"\tJNE {label.Replace(":", string.Empty)}");
                         return valor1 != valor2;
                 }
+                
             }
         }
         //While -> while(Condicion) bloqueInstrucciones | instruccion
         private void While(bool ejecuta)
         {
+            string labelInicio = $"jump_While_{whileCounter}:";
+            string labelFin = $"end_While_{whileCounter}:";
+            asm.WriteLine(labelInicio);
             match("while");
             match("(");
-            Condicion("");
+            Condicion(labelFin);
             match(")");
             if (Contenido == "{")
             {
@@ -517,6 +532,9 @@ namespace ASM
             {
                 Instruccion(ejecuta);
             }
+            asm.WriteLine($"\tJMP {labelInicio.Replace(":", string.Empty)}");
+            asm.WriteLine(labelFin);
+            whileCounter++;
         }
         /*Do -> do bloqueInstrucciones | intruccion 
         while(Condicion);*/
@@ -524,7 +542,7 @@ namespace ASM
         {
             match("do");
             asm.WriteLine("; Do");
-            string label = $"jump_do_{doWhileCounter++}:";
+            string label = $"jump_do_{doWhileCounter}:";
             asm.WriteLine(label);
             if (Contenido == "{")
             {
@@ -539,16 +557,21 @@ namespace ASM
             Condicion(label, true);
             match(")");
             match(";");
+            doWhileCounter++;
         }
         /*For -> for(Asignacion; Condicion; Asignacion) 
         BloqueInstrucciones | Intruccion*/
         private void For(bool ejecuta)
         {
+            string labelInicio = $"jump_For_{forCounter}:";
+            string labelFin = $"end_For_{forCounter}:";
             match("for");
             match("(");
             Asignacion(ejecuta);
             match(";");
-            Condicion("");
+            asm.WriteLine($"; Inicio de For {forCounter}");
+            asm.WriteLine(labelInicio);
+            Condicion(labelFin);
             match(";");
             Asignacion(ejecuta);
             match(")");
@@ -560,12 +583,17 @@ namespace ASM
             {
                 Instruccion(ejecuta);
             }
+            asm.WriteLine($"\tJMP {labelInicio.Replace(";", string.Empty)}");
+            asm.WriteLine(labelFin);
+            asm.WriteLine($"; Fin de For {forCounter}");
+            forCounter++;
         }
         //Console -> Console.(WriteLine|Write) (cadena? concatenaciones?);
         private void console(bool ejecuta)
         {
             bool isWriteLine = false;
             string concatenaciones = "";
+            string nombreVariable = "";
 
             match("Console");
             match(".");
@@ -597,6 +625,7 @@ namespace ASM
                 else
                 {
                     concatenaciones = v.Valor.ToString();
+                    nombreVariable = v.Nombre;
                     match(Tipos.Identificador);
                 }
             }
@@ -614,13 +643,13 @@ namespace ASM
                 if (isWriteLine)
                 {
                     Console.WriteLine(concatenaciones);
-                    asm.WriteLine($"\tPRINT_STRING \"{concatenaciones}\"");
+                    asm.WriteLine($"\tPRINT_STRING {nombreVariable}");
                     asm.WriteLine("\tNEWLINE");
                 }
                 else
                 {
                     Console.Write(concatenaciones);
-                    asm.WriteLine($"\tPRINT_STRING \"{concatenaciones}\"");
+                    asm.WriteLine($"\tPRINT_STRING \"{nombreVariable}\"");
                 }
             }
         }
@@ -634,6 +663,7 @@ namespace ASM
                 Variable? v = l.Find(variable => variable.Nombre == Contenido);
                 if (v != null)
                 {
+                    asm.WriteLine($"\tPRINT_DEC 4, {v.Nombre}");
                     resultado = v.Valor.ToString(); // Obtener el valor de la variable y convertirla
                 }
                 else
@@ -769,7 +799,7 @@ namespace ASM
                     maximoTipo = v.Tipo;
                 }
                 s.Push(v.Valor);
-                asm.WriteLine($"\tMOV EAX, {Contenido}");
+                asm.WriteLine($"\tMOV EAX, DWORD[{Contenido}]");
                 asm.WriteLine("\tPUSH EAX");
                 //Console.Write(Contenido + " ");
                 match(Tipos.Identificador);
