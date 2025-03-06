@@ -3,13 +3,13 @@ REQUERIMIENTOS:
 1. Declarar las variables con su tipo correspondiente en Ensamblador. O sea, declararlas con su tipo de dato correspondiente (Como Char, Byte, Int) [DONE]
 2. En Asignación, generar código en Ensamblador para ++(inc) & --(dec) [DONE]
 3. En Asignación, generar código en Ensamblador para +=, -=, *=, /=, %= [DONE]
-4. Generar código en Ensamblador para Console.Write y Console.WriteLine [DONE]
+4. Generar código en Ensamblador para Console.Write y Console.WriteLine [%]
 5. Generar código en Ensamblador para Console.Read y Console.ReadLine [%]
 6. Programar el do While [DONE]
 7. Programar el While [DONE]
 8. Programar el For [DONE]
 9. Condicionar todos los setValor en Asignación | ListaIdentificadores (If (ejecuta){}) [DONE]
-10. Programar el Else
+10. Programar el Else [DONE]
 11. Usar set y get en Variable [DONE]
 12. Ajustar todos los constructores con parámetros con default [DONE]
 */
@@ -389,8 +389,8 @@ namespace ASM
                 float valorDiv = s.Pop();
                 r = v.Valor / valorDiv;
                 asm.WriteLine($"\tMOV EAX, DWORD[{v.Nombre}]");
-                asm.WriteLine($"\tMOV EDX, 0");
                 asm.WriteLine($"\tMOV ECX, {valorDiv}");
+                asm.WriteLine($"\tXOR EDX, EDX");
                 asm.WriteLine($"\tDIV ECX");
                 asm.WriteLine($"\tMOV DWORD[{v.Nombre}], EAX");
                 //asm.WriteLine("\tPOP EAX");
@@ -416,12 +416,14 @@ namespace ASM
         (else bloqueInstrucciones | instruccion)?*/
         private void If(bool ejecuta2)
         {
+            string labelInicioIf = $"jump_if_{ifCounter}:";
+            string labelInicioElse = $"jump_else_{ifCounter}:";
+            string labelFinIf = $"fin_if_{ifCounter}:";
             match("if");
             match("(");
-            asm.WriteLine("; If");
-            string label = $"jump_if_{ifCounter++}:";
-            bool ejecuta = Condicion(label) && ejecuta2;
-            //Console.WriteLine(ejecuta);
+            asm.WriteLine($"; Inicio If/Else {ifCounter}");
+            asm.WriteLine(labelInicioIf);
+            bool ejecuta = Condicion(labelInicioElse) && ejecuta2; // Si if es falso, se salta directo a la etiqueta inicioElse
             match(")");
             if (Contenido == "{")
             {
@@ -432,7 +434,15 @@ namespace ASM
                 Instruccion(ejecuta);
             }
 
-            asm.WriteLine(label);
+            /* Si no salto al else, significa que se cumplió la condición if,
+            por lo tanto, debe saltar a la etiqueta finIf para NO ejecutar el else.
+            Si no estuviera esta etiqueta, se ejecutaría el else a pesar de que el if
+            se haya ejecutado */
+            asm.WriteLine($"\tJMP {labelFinIf.Replace(":", string.Empty)}");
+
+            /* En caso de no haberse cumplido el if, pasa por la etiqueta else
+            en la cual se generará el código de el else */
+            asm.WriteLine(labelInicioElse);
 
             if (Contenido == "else")
             {
@@ -447,6 +457,9 @@ namespace ASM
                     Instruccion(ejecutarElse);
                 }
             }
+            asm.WriteLine(labelFinIf); // Esta etiqueta es a la que se salta cuando ya se cumplió el if o cuando ya acabó la condicional
+            asm.WriteLine($"; Fin If/Else {ifCounter}");
+            ifCounter++;
         }
         //Condicion -> Expresion operadorRelacional Expresion
         private bool Condicion(string label, bool isDoWhile = false)
@@ -511,7 +524,6 @@ namespace ASM
                         asm.WriteLine($"\tJNE {label.Replace(":", string.Empty)}");
                         return valor1 != valor2;
                 }
-                
             }
         }
         //While -> while(Condicion) bloqueInstrucciones | instruccion
@@ -519,10 +531,10 @@ namespace ASM
         {
             string labelInicio = $"jump_While_{whileCounter}:";
             string labelFin = $"end_While_{whileCounter}:";
-            asm.WriteLine(labelInicio);
+            asm.WriteLine(labelInicio); // Indica a partir de donde hará los saltos de instrucción
             match("while");
             match("(");
-            Condicion(labelFin);
+            Condicion(labelFin); // Indica si la condición es falsa. Si lo es, salta a la etiqueta que da fin al ciclo
             match(")");
             if (Contenido == "{")
             {
@@ -532,8 +544,8 @@ namespace ASM
             {
                 Instruccion(ejecuta);
             }
-            asm.WriteLine($"\tJMP {labelInicio.Replace(":", string.Empty)}");
-            asm.WriteLine(labelFin);
+            asm.WriteLine($"\tJMP {labelInicio.Replace(":", string.Empty)}"); // Si la condición es verdadera, salta al inicio del bucle para repetirse
+            asm.WriteLine(labelFin); // En caso de haber llegado aquí significa que la condición del bucle es falsa y llegamos al fin del bucle
             whileCounter++;
         }
         /*Do -> do bloqueInstrucciones | intruccion 

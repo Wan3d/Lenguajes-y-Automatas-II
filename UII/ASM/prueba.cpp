@@ -5,13 +5,12 @@ using System.Threading.Tasks;
 
 static void Main(string[] args)
 {
-  int x = 5;
-  int i;
-  for(i = 1; x < 10; i++){
+  int x = 60;
+  if (x == 60){
     x++;
   }
-  for(i = 1; x < 10; i++){
-    x++;
+  else{
+    x--;
   }
 
 
