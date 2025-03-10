@@ -26,6 +26,7 @@ namespace ASM
     {
         private int ifCounter, whileCounter, doWhileCounter, forCounter;
         private int strCounter = 1;
+        private bool ejecutarIf, ejecutarElse;
         private List<string> cadenasGeneradas = new List<string>();  // Lista para almacenar las cadenas generadas
         Stack<float> s;
         List<Variable> l;
@@ -54,7 +55,7 @@ namespace ASM
             foreach (Variable elemento in l)
             {
                 log.WriteLine($"{elemento.Nombre} {elemento.Tipo} {elemento.Valor}");
-                asm.WriteLine($"{elemento.Nombre} DD {elemento.Valor}");
+                asm.WriteLine($"{elemento.Nombre} DD 0");
             }
 
             foreach (string cadenaCompleta in cadenasGeneradas)
@@ -441,36 +442,36 @@ namespace ASM
             asm.WriteLine($"; Inicio If/Else {ifCounter}");
             asm.WriteLine(labelInicioIf);
 
-            bool condicionCumplida = Condicion(labelInicioElse); // Evaluar la condición en cada iteración
-            bool ejecutarIf = condicionCumplida && ejecuta2;
+            ejecutarIf = Condicion(labelInicioElse) && ejecuta2;
 
             match(")");
 
             if (Contenido == "{")
             {
-                BloqueInstrucciones(ejecutarIf);
+                BloqueInstrucciones(true);
             }
             else
             {
-                Instruccion(ejecutarIf);
+                Instruccion(true);
             }
 
             asm.WriteLine($"\tJMP {labelFinCondicion.Replace(":", string.Empty)}");
+
             asm.WriteLine(labelInicioElse);
 
             if (Contenido == "else")
             {
                 match("else");
 
-                bool ejecutarElse = !condicionCumplida && ejecuta2;  // Solo ejecutar el else si el if no se ejecutó y ejecuta2 es true
+                ejecutarElse = !ejecutarIf && ejecuta2;  // Solo ejecutar el else si el if no se ejecutó y ejecuta2 es true
 
                 if (Contenido == "{")
                 {
-                    BloqueInstrucciones(ejecutarElse);
+                    BloqueInstrucciones(true);
                 }
                 else
                 {
-                    Instruccion(ejecutarElse);
+                    Instruccion(true);
                 }
             }
 
@@ -492,9 +493,11 @@ namespace ASM
             asm.WriteLine("; Expresión 2");
             Expresion();
             float valor2 = s.Pop();
+
             asm.WriteLine("\tPOP EBX");
             asm.WriteLine("\tPOP EAX");
             asm.WriteLine("\tCMP EAX, EBX");
+
             if (!isDoWhile)
             {
                 switch (operador)
@@ -591,10 +594,12 @@ namespace ASM
         }
         /*For -> for(Asignacion; Condicion; Asignacion) 
         BloqueInstrucciones | Intruccion*/
-        private void For(bool ejecuta, int nivel = 0)
+        private void For(bool ejecuta)
         {
             string labelInicio = $"jump_For_{forCounter}:";
             string labelFin = $"end_For_{forCounter}:";
+
+            forCounter++; // Se incrementa uno más por si hay un ciclo anidado, así generamos etiquetas únicas para cada for
 
             match("for");
             match("(");
@@ -623,7 +628,7 @@ namespace ASM
             asm.WriteLine(labelFin);
             asm.WriteLine($"; Fin de For {forCounter}");
 
-            forCounter++;
+            //forCounter++;
         }
         //Console -> Console.(WriteLine|Write) (cadena? concatenaciones?);
         private void console(bool ejecuta)
@@ -688,7 +693,6 @@ namespace ASM
                     Console.WriteLine(concatenaciones);
                     if (!isVariable)
                     {
-                        // Se genera el nombre y se usa correctamente
                         string nombreStr = $"str{strCounter - 1}";
                         asm.WriteLine($"\tPRINT_STRING {nombreStr}");
                     }
@@ -713,7 +717,6 @@ namespace ASM
                 }
             }
         }
-
         // Concatenaciones -> Identificador|Cadena ( + concatenaciones )?
         private string Concatenaciones()
         {
