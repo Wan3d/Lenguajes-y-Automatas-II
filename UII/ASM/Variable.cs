@@ -14,7 +14,7 @@ namespace ASM
         private TipoDato tipo;
         private string nombre;
         private float valor;
-
+        
         public Variable(TipoDato tipo, string nombre, float valor = 0)
         {
             this.tipo = tipo;

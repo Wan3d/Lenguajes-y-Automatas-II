@@ -25,6 +25,8 @@ namespace ASM
     public class Lenguaje : Sintaxis
     {
         private int ifCounter, whileCounter, doWhileCounter, forCounter;
+        private int strCounter = 1;
+        private List<string> cadenasGeneradas = new List<string>();  // Lista para almacenar las cadenas generadas
         Stack<float> s;
         List<Variable> l;
         Variable.TipoDato maximoTipo;
@@ -48,12 +50,23 @@ namespace ASM
         {
             asm.WriteLine("section .data");
             log.WriteLine("Lista de variables: ");
+
             foreach (Variable elemento in l)
             {
                 log.WriteLine($"{elemento.Nombre} {elemento.Tipo} {elemento.Valor}");
-                asm.WriteLine($"{elemento.Nombre} DD 0");
+                asm.WriteLine($"{elemento.Nombre} DD {elemento.Valor}");
+            }
+
+            foreach (string cadenaCompleta in cadenasGeneradas)
+            {
+                string[] partes = cadenaCompleta.Split('|');
+                string nombreStr = partes[0];
+                string cadena = partes[1];
+
+                asm.WriteLine($"{nombreStr} DB '{cadena}', 0");  // Definimos las cadenas correctamente
             }
         }
+
         //Programa  -> Librerias? Variables? Main
         public void Programa()
         {
@@ -145,6 +158,7 @@ namespace ASM
                         match("(");
                         string? r = Console.ReadLine();
                         asm.WriteLine($"\tGET_DEC 4, {v.Nombre}");
+                        asm.WriteLine("\tNEWLINE");
                         if (float.TryParse(r, out float valor))
                         {
                             //asm.WriteLine("\tPUSH");
@@ -312,6 +326,7 @@ namespace ASM
                         match("(");
                         string? line = Console.ReadLine();
                         asm.WriteLine($"\tGET_DEC 4, {v.Nombre}");
+                        asm.WriteLine("\tNEWLINE");
 
                         if (float.TryParse(line, out float numero))
                         {
@@ -418,36 +433,37 @@ namespace ASM
         {
             string labelInicioIf = $"jump_if_{ifCounter}:";
             string labelInicioElse = $"jump_else_{ifCounter}:";
-            string labelFinIf = $"fin_if_{ifCounter}:";
+            string labelFinCondicion = $"fin_Condicion_{ifCounter}:";
+
             match("if");
             match("(");
+
             asm.WriteLine($"; Inicio If/Else {ifCounter}");
             asm.WriteLine(labelInicioIf);
-            bool ejecuta = Condicion(labelInicioElse) && ejecuta2; // Si if es falso, se salta directo a la etiqueta inicioElse
+
+            bool condicionCumplida = Condicion(labelInicioElse); // Evaluar la condición en cada iteración
+            bool ejecutarIf = condicionCumplida && ejecuta2;
+
             match(")");
+
             if (Contenido == "{")
             {
-                BloqueInstrucciones(ejecuta);
+                BloqueInstrucciones(ejecutarIf);
             }
             else
             {
-                Instruccion(ejecuta);
+                Instruccion(ejecutarIf);
             }
 
-            /* Si no salto al else, significa que se cumplió la condición if,
-            por lo tanto, debe saltar a la etiqueta finIf para NO ejecutar el else.
-            Si no estuviera esta etiqueta, se ejecutaría el else a pesar de que el if
-            se haya ejecutado */
-            asm.WriteLine($"\tJMP {labelFinIf.Replace(":", string.Empty)}");
-
-            /* En caso de no haberse cumplido el if, pasa por la etiqueta else
-            en la cual se generará el código de el else */
+            asm.WriteLine($"\tJMP {labelFinCondicion.Replace(":", string.Empty)}");
             asm.WriteLine(labelInicioElse);
 
             if (Contenido == "else")
             {
                 match("else");
-                bool ejecutarElse = !ejecuta && ejecuta2; // Solo se ejecuta el else si el if no se ejecutó
+
+                bool ejecutarElse = !condicionCumplida && ejecuta2;  // Solo ejecutar el else si el if no se ejecutó y ejecuta2 es true
+
                 if (Contenido == "{")
                 {
                     BloqueInstrucciones(ejecutarElse);
@@ -457,8 +473,10 @@ namespace ASM
                     Instruccion(ejecutarElse);
                 }
             }
-            asm.WriteLine(labelFinIf); // Esta etiqueta es a la que se salta cuando ya se cumplió el if o cuando ya acabó la condicional
+
+            asm.WriteLine(labelFinCondicion);  // Etiqueta de fin de la condición
             asm.WriteLine($"; Fin If/Else {ifCounter}");
+
             ifCounter++;
         }
         //Condicion -> Expresion operadorRelacional Expresion
@@ -573,20 +591,25 @@ namespace ASM
         }
         /*For -> for(Asignacion; Condicion; Asignacion) 
         BloqueInstrucciones | Intruccion*/
-        private void For(bool ejecuta)
+        private void For(bool ejecuta, int nivel = 0)
         {
             string labelInicio = $"jump_For_{forCounter}:";
             string labelFin = $"end_For_{forCounter}:";
+
             match("for");
             match("(");
             Asignacion(ejecuta);
             match(";");
+
             asm.WriteLine($"; Inicio de For {forCounter}");
             asm.WriteLine(labelInicio);
+
             Condicion(labelFin);
             match(";");
+
             Asignacion(ejecuta);
             match(")");
+
             if (Contenido == "{")
             {
                 BloqueInstrucciones(ejecuta);
@@ -595,9 +618,11 @@ namespace ASM
             {
                 Instruccion(ejecuta);
             }
-            asm.WriteLine($"\tJMP {labelInicio.Replace(";", string.Empty)}");
+
+            asm.WriteLine($"\tJMP {labelInicio.Replace(":", string.Empty)}");
             asm.WriteLine(labelFin);
             asm.WriteLine($"; Fin de For {forCounter}");
+
             forCounter++;
         }
         //Console -> Console.(WriteLine|Write) (cadena? concatenaciones?);
@@ -606,6 +631,7 @@ namespace ASM
             bool isWriteLine = false;
             string concatenaciones = "";
             string nombreVariable = "";
+            bool isVariable = false;
 
             match("Console");
             match(".");
@@ -625,6 +651,10 @@ namespace ASM
             if (Clasificacion == Tipos.Cadena)
             {
                 concatenaciones = Contenido.Trim('"');
+                string nombreStr = $"str{strCounter}"; // Guardar la cadena junto con el nombre generado
+
+                cadenasGeneradas.Add($"{nombreStr}|{concatenaciones}"); // Agregar el nombre junto a la cadena
+                strCounter++;
                 match(Tipos.Cadena);
             }
             else
@@ -639,6 +669,7 @@ namespace ASM
                     concatenaciones = v.Valor.ToString();
                     nombreVariable = v.Nombre;
                     match(Tipos.Identificador);
+                    isVariable = true;
                 }
             }
 
@@ -655,13 +686,30 @@ namespace ASM
                 if (isWriteLine)
                 {
                     Console.WriteLine(concatenaciones);
-                    asm.WriteLine($"\tPRINT_STRING {nombreVariable}");
+                    if (!isVariable)
+                    {
+                        // Se genera el nombre y se usa correctamente
+                        string nombreStr = $"str{strCounter - 1}";
+                        asm.WriteLine($"\tPRINT_STRING {nombreStr}");
+                    }
+                    else
+                    {
+                        asm.WriteLine($"\tPRINT_DEC 4, {nombreVariable}");
+                    }
                     asm.WriteLine("\tNEWLINE");
                 }
                 else
                 {
                     Console.Write(concatenaciones);
-                    asm.WriteLine($"\tPRINT_STRING \"{nombreVariable}\"");
+                    if (!isVariable)
+                    {
+                        string nombreStr = $"str{strCounter - 1}";
+                        asm.WriteLine($"\tPRINT_STRING {nombreStr}");
+                    }
+                    else
+                    {
+                        asm.WriteLine($"\tPRINT_DEC 4, {nombreVariable}");
+                    }
                 }
             }
         }
@@ -675,8 +723,8 @@ namespace ASM
                 Variable? v = l.Find(variable => variable.Nombre == Contenido);
                 if (v != null)
                 {
-                    asm.WriteLine($"\tPRINT_DEC 4, {v.Nombre}");
                     resultado = v.Valor.ToString(); // Obtener el valor de la variable y convertirla
+                    //asm.WriteLine($"\tPRINT_DEC 4, {v.Nombre}");
                 }
                 else
                 {
@@ -776,8 +824,9 @@ namespace ASM
                         asm.WriteLine("\tPUSH EAX");
                         break;
                     case "%":
-                        s.Push(n2 % n1);
+                        asm.WriteLine("\tXOR EDX, EDX");
                         asm.WriteLine("\tDIV EBX");
+                        s.Push(n2 % n1);
                         asm.WriteLine("\tPUSH EDX");
                         break;
                 }
@@ -838,14 +887,14 @@ namespace ASM
                 {
                     maximoTipo = tipoCasteo;
                     float r = s.Pop();
-                    asm.WriteLine("\tPOP");
+                    //asm.WriteLine("\tPOP");
                     switch (tipoCasteo)
                     {
-                        case Variable.TipoDato.Int: r = (r % 65536); break;
-                        case Variable.TipoDato.Char: r = (r % 256); break;
+                        case Variable.TipoDato.Int: r = r % 65536; break;
+                        case Variable.TipoDato.Char: r = r % 256; break;
                     }
                     s.Push(r);
-                    asm.WriteLine("\tPUSH");
+                    //asm.WriteLine("\tPUSH");
                 }
                 match(")");
             }
