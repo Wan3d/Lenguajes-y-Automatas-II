@@ -22,12 +22,14 @@ static void Main(string[] args)
 
     for (i = 1; i<=altura; i++)
     {
-        for (j = 1; j<=i; j++)
+        j=1;
+        while(j<=i)
         {
             if (j%2==0)
                 Console.Write("*");
             else
                 Console.Write("-");
+        j++;
         }
         Console.WriteLine("");
     }

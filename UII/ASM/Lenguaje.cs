@@ -3,8 +3,8 @@ REQUERIMIENTOS:
 1. Declarar las variables con su tipo correspondiente en Ensamblador. O sea, declararlas con su tipo de dato correspondiente (Como Char, Byte, Int) [DONE]
 2. En Asignación, generar código en Ensamblador para ++(inc) & --(dec) [DONE]
 3. En Asignación, generar código en Ensamblador para +=, -=, *=, /=, %= [DONE]
-4. Generar código en Ensamblador para Console.Write y Console.WriteLine [%]
-5. Generar código en Ensamblador para Console.Read y Console.ReadLine [%]
+4. Generar código en Ensamblador para Console.Write y Console.WriteLine [DONE]
+5. Generar código en Ensamblador para Console.Read y Console.ReadLine [DONE]
 6. Programar el do While [DONE]
 7. Programar el While [DONE]
 8. Programar el For [DONE]
@@ -552,6 +552,9 @@ namespace ASM
         {
             string labelInicio = $"jump_While_{whileCounter}:";
             string labelFin = $"end_While_{whileCounter}:";
+
+            whileCounter++;
+
             asm.WriteLine(labelInicio); // Indica a partir de donde hará los saltos de instrucción
             match("while");
             match("(");
@@ -567,7 +570,6 @@ namespace ASM
             }
             asm.WriteLine($"\tJMP {labelInicio.Replace(":", string.Empty)}"); // Si la condición es verdadera, salta al inicio del bucle para repetirse
             asm.WriteLine(labelFin); // En caso de haber llegado aquí significa que la condición del bucle es falsa y llegamos al fin del bucle
-            whileCounter++;
         }
         /*Do -> do bloqueInstrucciones | intruccion 
         while(Condicion);*/
@@ -610,6 +612,7 @@ namespace ASM
             asm.WriteLine(labelInicio);
 
             Condicion(labelFin);
+
             match(";");
 
             Asignacion(ejecuta);
@@ -727,7 +730,6 @@ namespace ASM
                 if (v != null)
                 {
                     resultado = v.Valor.ToString(); // Obtener el valor de la variable y convertirla
-                    //asm.WriteLine($"\tPRINT_DEC 4, {v.Nombre}");
                 }
                 else
                 {
@@ -890,14 +892,14 @@ namespace ASM
                 {
                     maximoTipo = tipoCasteo;
                     float r = s.Pop();
-                    //asm.WriteLine("\tPOP");
+                    asm.WriteLine("\tPOP EAX");
                     switch (tipoCasteo)
                     {
                         case Variable.TipoDato.Int: r = r % 65536; break;
                         case Variable.TipoDato.Char: r = r % 256; break;
                     }
                     s.Push(r);
-                    //asm.WriteLine("\tPUSH");
+                    asm.WriteLine("\tPUSH EAX");
                 }
                 match(")");
             }
