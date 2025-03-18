@@ -1,23 +1,45 @@
 ; Archivo: prueba.cpp
-; Fecha y hora: 11/03/2025 11:55:32
+; Fecha y hora: 17/03/2025 22:50:07
 ; ----------------------------------
 %include "io.inc"
 segment .text
 global main
 main:
-; Asignación de a
-	MOV EAX, 260
+; Asignación de x
+	MOV EAX, 0
 	PUSH EAX
 	POP EAX
-	MOV DWORD[a], EAX
-; Asignación de b
-	MOV EAX, DWORD[a]
+	MOV DWORD[x], EAX
+; Asignación de y
+	MOV EAX, 10
 	PUSH EAX
 	POP EAX
+	MOV DWORD[y], EAX
+; Asignación de z
+	MOV EAX, 2
 	PUSH EAX
 	POP EAX
-	MOV DWORD[b], EAX
+	MOV DWORD[z], EAX
+	MOV EAX, 400
+	PUSH EAX
+	MOV EAX, 200
+	PUSH EAX
+	POP EBX
+	POP EAX
+	ADD EAX, EBX
+	PUSH EAX
+	POP EAX
+	MOV EBX, 256
+	XOR EDX, EDX
+	DIV EBX
+	MOV EAX, EDX
+	PUSH EAX
+	POP EAX
+	MOV DWORD[c], EAX
 	RET
 section .data
-a DD 0
-b DD 0
+altura DD 0
+x DD 0
+y DD 0
+z DD 0
+c DD 0

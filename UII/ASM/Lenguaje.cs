@@ -28,7 +28,7 @@ namespace ASM
         private int strCounter = 1;
         private bool ejecutarIf, ejecutarElse;
         private List<string> cadenasGeneradas = new List<string>();  // Lista para almacenar las cadenas generadas
-        Stack<float> s;
+            Stack<float> s;
         List<Variable> l;
         Variable.TipoDato maximoTipo;
         public Lenguaje(string nombre = "prueba.cpp") : base(nombre)
@@ -57,7 +57,7 @@ namespace ASM
                 log.WriteLine($"{elemento.Nombre} {elemento.Tipo} {elemento.Valor}");
                 asm.WriteLine($"{elemento.Nombre} DD 0");
             }
-
+            
             foreach (string cadenaCompleta in cadenasGeneradas)
             {
                 string[] partes = cadenaCompleta.Split('|');
@@ -108,7 +108,7 @@ namespace ASM
             match(";");
             if (Clasificacion == Tipos.TipoDato)
             {
-                Variables(true);
+                Variables(ejecuta);
             }
         }
         //ListaLibrerias -> identificador (.ListaLibrerias)?
@@ -659,10 +659,11 @@ namespace ASM
             if (Clasificacion == Tipos.Cadena)
             {
                 concatenaciones = Contenido.Trim('"');
-                string nombreStr = $"str{strCounter}"; // Guardar la cadena junto con el nombre generado
 
+                string nombreStr = $"str{strCounter}"; // Guardar la cadena junto con el nombre generado
                 cadenasGeneradas.Add($"{nombreStr}|{concatenaciones}"); // Agregar el nombre junto a la cadena
                 strCounter++;
+
                 match(Tipos.Cadena);
             }
             else
@@ -895,8 +896,18 @@ namespace ASM
                     asm.WriteLine("\tPOP EAX");
                     switch (tipoCasteo)
                     {
-                        case Variable.TipoDato.Int: r = r % 65536; break;
-                        case Variable.TipoDato.Char: r = r % 256; break;
+                        case Variable.TipoDato.Int: r = r % 65536; 
+                        asm.WriteLine("\tMOV EBX, 65536");
+                        asm.WriteLine("\tXOR EDX, EDX");
+                        asm.WriteLine("\tDIV EBX");
+                        asm.WriteLine("\tMOV EAX, EDX");
+                        break;
+                        case Variable.TipoDato.Char: r = r % 256; 
+                        asm.WriteLine("\tMOV EBX, 256");
+                        asm.WriteLine("\tXOR EDX, EDX");
+                        asm.WriteLine("\tDIV EBX");
+                        asm.WriteLine("\tMOV EAX, EDX");
+                        break;
                     }
                     s.Push(r);
                     asm.WriteLine("\tPUSH EAX");
