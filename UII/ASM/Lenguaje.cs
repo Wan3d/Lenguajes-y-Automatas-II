@@ -26,9 +26,8 @@ namespace ASM
     {
         private int ifCounter, whileCounter, doWhileCounter, forCounter;
         private int strCounter = 1;
-        private bool ejecutarIf, ejecutarElse;
         private List<string> cadenasGeneradas = new List<string>();  // Lista para almacenar las cadenas generadas
-            Stack<float> s;
+        Stack<float> s;
         List<Variable> l;
         Variable.TipoDato maximoTipo;
         public Lenguaje(string nombre = "prueba.cpp") : base(nombre)
@@ -55,9 +54,21 @@ namespace ASM
             foreach (Variable elemento in l)
             {
                 log.WriteLine($"{elemento.Nombre} {elemento.Tipo} {elemento.Valor}");
-                asm.WriteLine($"{elemento.Nombre} DD 0");
+                //asm.WriteLine($"{elemento.Nombre} DD 0");
+                switch (elemento.Tipo)
+                {
+                    case Variable.TipoDato.Char:
+                        asm.WriteLine($"{elemento.Nombre} DB 0");
+                        break;
+                    case Variable.TipoDato.Int:
+                        asm.WriteLine($"{elemento.Nombre} DW 0"); // 16 bits
+                        break;
+                    case Variable.TipoDato.Float:
+                        asm.WriteLine($"{elemento.Nombre} DD 0"); // 32 bits
+                        break;
+                }
             }
-            
+
             foreach (string cadenaCompleta in cadenasGeneradas)
             {
                 string[] partes = cadenaCompleta.Split('|');
@@ -349,7 +360,7 @@ namespace ASM
                     Expresion();
                     r = s.Pop();
                     asm.WriteLine("\tPOP EAX");
-                    asm.WriteLine($"\tMOV DWORD[{v.Nombre}], EAX"); //CORREGIR
+                    asm.WriteLine($"\tMOV DWORD[{v.Nombre}], EAX"); 
                     if (ejecuta)
                     {
                         /*if (maximoTipo > Variable.valorToTipoDato(r))
@@ -434,50 +445,54 @@ namespace ASM
         {
             string labelInicioIf = $"jump_if_{ifCounter}:";
             string labelInicioElse = $"jump_else_{ifCounter}:";
-            string labelFinCondicion = $"fin_Condicion_{ifCounter}:";
-
+            string labelFinIf = $"fin_if_{ifCounter}:";
             match("if");
             match("(");
-
             asm.WriteLine($"; Inicio If/Else {ifCounter}");
             asm.WriteLine(labelInicioIf);
-
-            ejecutarIf = Condicion(labelInicioElse) && ejecuta2;
-
+            bool ejecutarIf = Condicion(labelInicioElse) && ejecuta2; // Si if es falso, se salta directo a la etiqueta inicioElse
             match(")");
-
             if (Contenido == "{")
             {
-                BloqueInstrucciones(true);
+                BloqueInstrucciones(ejecutarIf);
             }
             else
             {
-                Instruccion(true);
+                Instruccion(ejecutarIf);
             }
 
-            asm.WriteLine($"\tJMP {labelFinCondicion.Replace(":", string.Empty)}");
+            /*Si no salto al else, significa que se cumplió la condición if,
+            por lo tanto, debe saltar a la etiqueta finIf para NO ejecutar el else.
+            Si no estuviera esta etiqueta, se ejecutaría el else a pesar de que el if
+            se haya ejecutado*/
+            asm.WriteLine($"\tJMP {labelFinIf.Replace(":", string.Empty)}");
 
+            /* En caso de no haberse cumplido el if, pasa por la etiqueta else
+            en la cual se generará el código de el else */
             asm.WriteLine(labelInicioElse);
 
             if (Contenido == "else")
             {
                 match("else");
-
-                ejecutarElse = !ejecutarIf && ejecuta2;  // Solo ejecutar el else si el if no se ejecutó y ejecuta2 es true
-
+                bool ejecutarElse = !ejecutarIf && ejecuta2; // Solo se ejecuta el else si el if no se ejecutó*/
+                /*Console.WriteLine($"EjecutarIf {ejecutarIf}");
+                Console.WriteLine($"Ejecuta2 {ejecuta2}");
+                Console.WriteLine($"EjecutarElse = {ejecutarElse}");*/
                 if (Contenido == "{")
                 {
-                    BloqueInstrucciones(true);
+                    BloqueInstrucciones(ejecuta2);
                 }
                 else
                 {
-                    Instruccion(true);
+                    Instruccion(ejecuta2);
                 }
             }
-
-            asm.WriteLine(labelFinCondicion);  // Etiqueta de fin de la condición
+            else
+            {
+                asm.WriteLine($"JMP {labelFinIf.Replace(":", string.Empty)}");
+            }
+            asm.WriteLine(labelFinIf); // Esta etiqueta es a la que se salta cuando ya se cumplió el if o cuando ya acabó la condicional
             asm.WriteLine($"; Fin If/Else {ifCounter}");
-
             ifCounter++;
         }
         //Condicion -> Expresion operadorRelacional Expresion
@@ -896,18 +911,20 @@ namespace ASM
                     asm.WriteLine("\tPOP EAX");
                     switch (tipoCasteo)
                     {
-                        case Variable.TipoDato.Int: r = r % 65536; 
-                        asm.WriteLine("\tMOV EBX, 65536");
-                        asm.WriteLine("\tXOR EDX, EDX");
-                        asm.WriteLine("\tDIV EBX");
-                        asm.WriteLine("\tMOV EAX, EDX");
-                        break;
-                        case Variable.TipoDato.Char: r = r % 256; 
-                        asm.WriteLine("\tMOV EBX, 256");
-                        asm.WriteLine("\tXOR EDX, EDX");
-                        asm.WriteLine("\tDIV EBX");
-                        asm.WriteLine("\tMOV EAX, EDX");
-                        break;
+                        case Variable.TipoDato.Int:
+                            r = r % 65536;
+                            asm.WriteLine("\tMOV EBX, 65536");
+                            asm.WriteLine("\tXOR EDX, EDX");
+                            asm.WriteLine("\tDIV EBX");
+                            asm.WriteLine("\tMOV EAX, EDX");
+                            break;
+                        case Variable.TipoDato.Char:
+                            r = r % 256;
+                            asm.WriteLine("\tMOV EBX, 256");
+                            asm.WriteLine("\tXOR EDX, EDX");
+                            asm.WriteLine("\tDIV EBX");
+                            asm.WriteLine("\tMOV EAX, EDX");
+                            break;
                     }
                     s.Push(r);
                     asm.WriteLine("\tPUSH EAX");
