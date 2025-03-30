@@ -20,6 +20,7 @@ namespace Emulador
         public static int linea = 1;
         const int F = -1;
         const int E = -2;
+        protected int contadorCaracteres;
         public static int columna = 1;
         readonly int[,] TRAND = {
                 {  0,  1,  2, 33,  1, 12, 14,  8,  9, 10, 11, 23, 16, 16, 18, 20, 21, 26, 25, 27, 29, 32, 34,  0,  F, 33  },
@@ -63,16 +64,17 @@ namespace Emulador
             };
         public Lexico(string nombreArchivo)
         {
+            contadorCaracteres = 1;
             string nombreArchivoWithoutExt = Path.GetFileNameWithoutExtension(nombreArchivo);   //Obtenemos el nombre del archivo sin la extensión para poder crear el .log y .asm
             log = new StreamWriter(nombreArchivoWithoutExt + ".log");
-            if (File.Exists(nombreArchivo))
+            if (File.Exists($"C:\\Users\\zullo\\OneDrive\\Escritorio\\V - Semestre\\Lenguajes y Automatas II\\Proyectos\\UIII\\Emulador\\{nombreArchivo}"))
             {
                 if (Path.GetExtension(nombreArchivo) == ".cpp")
                 {
                     asm = new StreamWriter(nombreArchivoWithoutExt + ".asm");
                     log.AutoFlush = true;
                     asm.AutoFlush = true;
-                    archivo = new StreamReader(nombreArchivo);
+                    archivo = new StreamReader($"C:\\Users\\zullo\\OneDrive\\Escritorio\\V - Semestre\\Lenguajes y Automatas II\\Proyectos\\UIII\\Emulador\\{nombreArchivo}");
                     DateTime ahora = DateTime.Now;
                     log.WriteLine("Archivo: " + nombreArchivo);
                     log.WriteLine("Fecha y hora: " + ahora.ToString());
@@ -263,6 +265,7 @@ namespace Emulador
                 if (estado >= 0)
                 {
                     archivo.Read();
+                    contadorCaracteres++;
                     if (c == '\n')
                     {
                         linea++;
@@ -329,6 +332,11 @@ namespace Emulador
                         case "max":
                         case "abs":
                         case "min":
+                        case "log10":
+                        case "log2":
+                        case "rand":
+                        case "trunc":
+                        case "round":
                             Clasificacion = Tipos.FuncionMatematica;
                             break;
                     }

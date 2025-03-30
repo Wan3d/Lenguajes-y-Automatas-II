@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 
 static void Main(string[] args)
 {
-    int x = 5;
-    Console.WriteLine(x + "Esta es x");
+    int i = 0;
+    i = Console.Read();
+    Console.WriteLine(i);
 }

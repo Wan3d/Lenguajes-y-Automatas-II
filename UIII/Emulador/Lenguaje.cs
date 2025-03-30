@@ -1,10 +1,13 @@
 /*
 REQUERIMIENTOS:
 
-1) Excepción en el Console.Read()
+1) Excepción en el Console.Read() [DONE]
 2) La segunda asignación del for (incremento) debe de ejecutarse después del bloque de instrucciones | instrucción
-
+3) Programar todas las funciones matemáticas que están en Léxico en la función matemática de Lenguaje [%]
+4) Programar el método For
+5) Programar el método Whiles
 */
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -107,11 +110,18 @@ namespace Emulador
                     {
                         match("Read");
                         int r = Console.Read();
-                        if (maximoTipo > Variable.valorToTipoDato(r))
+                        if (r >= 32 && r <= 126)
                         {
-                            throw new Error("Tipo dato. No está permitido asignar un valor " + maximoTipo + " a una variable " + Variable.valorToTipoDato(r), log, linea, columna);
+                            if (maximoTipo > Variable.valorToTipoDato(r))
+                            {
+                                throw new Error("Tipo dato. No está permitido asignar un valor " + maximoTipo + " a una variable " + Variable.valorToTipoDato(r), log, linea, columna);
+                            }
+                            v.setValor(r);
                         }
-                        v.setValor(r);
+                        else
+                        {
+                            throw new Error("Semántico. No se ingresó un carácter válido ", log, linea, columna);
+                        }
                     }
                     else
                     {
@@ -400,20 +410,42 @@ namespace Emulador
         while(Condicion);*/
         private void Do(bool ejecuta)
         {
+            bool ejecutarDo;
+            int temp = contadorCaracteres - 3;
+            int tempLine = Lexico.linea;
+
             match("do");
-            if (Contenido == "{")
+
+            /*Método Seek
+            public override long Seek(long offset, System.IO.SeekOrigin origin);
+            Offset = Int64 -> Indica la cantidad de bytes (posiciones) que va a recorrer desde el origen
+            Origin = SeekOrigin -> Indica desde donde se empezará a buscar
+            Y devuelve la nueva posición del cursor
+            */
+
+            do
             {
-                BloqueInstrucciones(ejecuta);
-            }
-            else
-            {
-                Instruccion(ejecuta);
-            }
-            match("while");
-            match("(");
-            bool ejecutarDo = Condicion() && ejecuta;
-            match(")");
-            match(";");
+                if (Contenido == "{")
+                {
+                    BloqueInstrucciones(ejecuta);
+                }
+                else
+                {
+                    Instruccion(ejecuta);
+                }
+
+                match("while");
+                match("(");
+                ejecutarDo = Condicion() && ejecuta;
+                match(")");
+                match(";");
+
+                if (ejecutarDo)
+                {
+                    contadorCaracteres = temp;
+                    Lexico.linea = tempLine;
+                }
+            } while (ejecutarDo);
         }
         /*For -> for(Asignacion; Condicion; Asignacion) 
         BloqueInstrucciones | Intruccion*/
@@ -611,6 +643,20 @@ namespace Emulador
                 //Console.Write(Contenido + " ");
                 match(Tipos.Identificador);
             }
+            else if (Clasificacion == Tipos.FuncionMatematica)
+            {
+                string nombreResultado = Contenido;
+                match(Tipos.FuncionMatematica);
+
+                match("(");
+                Expresion();
+                match(")");
+
+                float resultado = s.Pop();
+
+                float resultadoFuncion = funcionMatematica(resultado, nombreResultado);
+                s.Push(resultadoFuncion);
+            }
             else
             {
                 match("(");
@@ -642,6 +688,31 @@ namespace Emulador
                 }
                 match(")");
             }
+        }
+        private float funcionMatematica(float resultado, string nombreExpresion)
+        {
+            switch (nombreExpresion)
+            {
+                case "ceil": return (float)Math.Ceiling(resultado);
+                case "pow": return (float)Math.Pow(resultado, 2);
+                case "sqrt": return (float)Math.Sqrt(resultado);
+                case "exp": return (float)Math.Exp(resultado);
+                /*case "equal": 
+                Se deben ingresar dos valores entre los que se verifica si son iguales,
+                pero se supone que solo estamos pasando un valor*/
+                case "floor": return (float)Math.Floor(resultado);
+                /*case "max": return (float)Math.Max(resultado);
+                Retorna el valor mayor entre dos valores, pero solo queremos ingresar uno*/
+                case "abs": return Math.Abs(resultado);
+                /*case "min":
+                Retorna el valor menor entre dos valores, pero solo queremos ingresar uno*/
+                case "log10": return (float)Math.Log10(resultado);
+                case "log2": return (float)Math.Log2(resultado);
+                case "rand": Random random = new Random(); return random.Next(0, (int)(resultado));
+                case "trunc": return (float)Math.Truncate(resultado);
+                case "round": return (float)Math.Round(resultado);
+            }
+            return resultado;
         }
         /*SNT = Producciones = Invocar el metodo
         ST  = Tokens (Contenido | Classification) = Invocar match Variables -> tipo_dato Lista_identificadores; Variables?*/
