@@ -2,10 +2,9 @@
 REQUERIMIENTOS:
 
 1) Excepción en el Console.Read() [DONE]
-2) La segunda asignación del for (incremento) debe de ejecutarse después del bloque de instrucciones | instrucción
-3) Programar todas las funciones matemáticas que están en Léxico en la función matemática de Lenguaje [%]
-4) Programar el método For
-5) Programar el método Whiles
+2) Programar todas las funciones matemáticas que están en Léxico en la función matemática de Lenguaje [%]
+3) Programar el método For. La segunda asignación del for (incremento) debe de ejecutarse después del bloque de instrucciones | instrucción
+4) Programar el método While
 */
 
 using System;
@@ -354,10 +353,11 @@ namespace Emulador
             {
                 Instruccion(ejecuta);
             }
+
             if (Contenido == "else")
             {
                 match("else");
-                bool ejecutarElse = ejecuta && !ejecuta; // Solo se ejecuta el else si el if no se ejecutó
+                bool ejecutarElse = !ejecuta && ejecuta2; // Solo se ejecuta el else si el if no se ejecutó
                 if (Contenido == "{")
                 {
                     BloqueInstrucciones(ejecutarElse);
@@ -411,10 +411,8 @@ namespace Emulador
         private void Do(bool ejecuta)
         {
             bool ejecutarDo;
-            int temp = contadorCaracteres - 3;
+            int tempChar = contadorCaracteres - 3;
             int tempLine = Lexico.linea;
-
-            match("do");
 
             /*Método Seek
             public override long Seek(long offset, System.IO.SeekOrigin origin);
@@ -425,6 +423,7 @@ namespace Emulador
 
             do
             {
+                match("do");
                 if (Contenido == "{")
                 {
                     BloqueInstrucciones(ejecuta);
@@ -442,8 +441,11 @@ namespace Emulador
 
                 if (ejecutarDo)
                 {
-                    contadorCaracteres = temp;
+                    archivo.DiscardBufferedData();
+                    archivo.BaseStream.Seek(tempChar, SeekOrigin.Begin);
+                    contadorCaracteres = tempChar;
                     Lexico.linea = tempLine;
+                    nextToken();
                 }
             } while (ejecutarDo);
         }
@@ -697,15 +699,10 @@ namespace Emulador
                 case "pow": return (float)Math.Pow(resultado, 2);
                 case "sqrt": return (float)Math.Sqrt(resultado);
                 case "exp": return (float)Math.Exp(resultado);
-                /*case "equal": 
-                Se deben ingresar dos valores entre los que se verifica si son iguales,
-                pero se supone que solo estamos pasando un valor*/
                 case "floor": return (float)Math.Floor(resultado);
                 /*case "max": return (float)Math.Max(resultado);
                 Retorna el valor mayor entre dos valores, pero solo queremos ingresar uno*/
                 case "abs": return Math.Abs(resultado);
-                /*case "min":
-                Retorna el valor menor entre dos valores, pero solo queremos ingresar uno*/
                 case "log10": return (float)Math.Log10(resultado);
                 case "log2": return (float)Math.Log2(resultado);
                 case "rand": Random random = new Random(); return random.Next(0, (int)(resultado));

@@ -14,7 +14,7 @@ namespace Emulador
 {
     public class Lexico : Token, IDisposable
     {
-        public StreamReader archivo;
+        protected StreamReader archivo;
         public static StreamWriter log = null!;
         public StreamWriter asm;
         public static int linea = 1;
@@ -327,11 +327,9 @@ namespace Emulador
                         case "pow":
                         case "sqrt":
                         case "exp":
-                        case "equal":
                         case "floor":
-                        case "max":
+                        case "max": // Devuelve el máximo depende del tipo de dato. Por ejemplo: si es char, el máximo es 255
                         case "abs":
-                        case "min":
                         case "log10":
                         case "log2":
                         case "rand":

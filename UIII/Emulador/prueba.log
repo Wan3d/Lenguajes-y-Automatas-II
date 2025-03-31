@@ -1,6 +1,5 @@
 Archivo: prueba.cpp
-Fecha y hora: 29/03/2025 22:16:34
+Fecha y hora: 31/03/2025 11:49:50
 ----------------------------------
 Constructor lenguaje
-Lista de variables: 
-i Int 32
+Error: Tipo dato. No está permitido asignar un valor Float a una variable Char en la linea [36] en la columna [15]
