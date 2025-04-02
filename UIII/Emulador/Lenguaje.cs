@@ -387,10 +387,7 @@ namespace Emulador
         {
             int tempChar = contadorCaracteres - 6;
             int tempLine = Lexico.linea;
-
             bool ejecutarWhile;
-
-            int lastPosition = 0;
 
             match("while");
 
@@ -416,9 +413,8 @@ namespace Emulador
                     Instruccion(ejecuta);
                 }
 
+                //Console.WriteLine("lastPosition = " + lastPosition);
                 //Console.WriteLine("Contenido = " + Contenido);
-
-                lastPosition = contadorCaracteres;
 
                 archivo.DiscardBufferedData(); // Limpia el buffer
 
@@ -492,21 +488,22 @@ namespace Emulador
         BloqueInstrucciones | Intruccion*/
         private void For(bool ejecuta)
         {
+            bool ejecutarFor;
             match("for");
             match("(");
             Asignacion();
             match(";");
-            bool ejecutarFor = Condicion() && ejecuta;
+            ejecutarFor = Condicion() && ejecuta;
             match(";");
             Asignacion();
             match(")");
             if (Contenido == "{")
             {
-                BloqueInstrucciones(ejecutarFor);
+                BloqueInstrucciones(ejecuta);
             }
             else
             {
-                Instruccion(ejecutarFor);
+                Instruccion(ejecuta);
             }
         }
         //Console -> Console.(WriteLine|Write) (cadena? concatenaciones?);
@@ -665,7 +662,7 @@ namespace Emulador
                 string operador = Contenido;
                 match(Tipos.OperadorFactor);
                 Factor();
-                
+
                 //Console.Write(operador + " ");
                 float n1 = s.Pop();
                 float n2 = s.Pop();

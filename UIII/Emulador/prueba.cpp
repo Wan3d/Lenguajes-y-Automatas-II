@@ -11,27 +11,37 @@ static void Main(string[] args)
     // x = Console.ReadLine();
     x = Console.Read();
     int cont;
-    int altura = 5;
+    int altura = 10;
+    i = 0;
+
+    /*for (i = 1; i < x; i++)
+    {
+        Console.WriteLine(i);
+    }*/
+
     i = 1;
-    while (i <= altura)
+    while (i <= x)
     {
         j = 1;
         while (j <= i)
         {
             if (j % 2 == 0)
-            {
                 Console.Write("*");
-            }
             else
-            {
                 Console.Write("-");
-                j++;
-            }
+            j++;
         }
+        i++;
         Console.WriteLine();
+    }
+    /*Console.WriteLine("Altura = " + altura);
+    i = 0;
+    while (i < x)
+    {
+        Console.Write(i + " ");
         i++;
     }
-    Console.WriteLine("Altura = " + altura);
+    Console.WriteLine();*/
 }
 
 /*char n;

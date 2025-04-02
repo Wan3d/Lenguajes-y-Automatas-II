@@ -1,5 +1,5 @@
 Archivo: prueba.cpp
-Fecha y hora: 02/04/2025 12:17:28
+Fecha y hora: 02/04/2025 15:19:21
 ----------------------------------
 Constructor lenguaje
 Lista de variables: 
@@ -8,4 +8,4 @@ i Float 7
 j Float 2
 res Float 0
 cont Int 0
-altura Int 5
+altura Int 10
