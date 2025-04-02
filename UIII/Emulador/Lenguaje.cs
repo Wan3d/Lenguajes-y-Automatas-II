@@ -4,7 +4,7 @@ REQUERIMIENTOS:
 1) Excepción en el Console.Read() [DONE]
 2) Programar todas las funciones matemáticas que están en Léxico en la función matemática de Lenguaje [%]
 3) Programar el método For. La segunda asignación del for (incremento) debe de ejecutarse después del bloque de instrucciones | instrucción
-4) Programar el método While
+4) Programar el método While [%]
 */
 
 using System;
@@ -21,6 +21,7 @@ namespace Emulador
         Stack<float> s;
         List<Variable> l;
         Variable.TipoDato maximoTipo;
+
         public Lenguaje(string nombre = "prueba.cpp") : base(nombre)
         {
             s = new Stack<float>();
@@ -109,13 +110,11 @@ namespace Emulador
                     {
                         match("Read");
                         int r = Console.Read();
-                        if (r >= 32 && r <= 126)
+                        if (r >= 48 && r <= 57)
                         {
-                            if (maximoTipo > Variable.valorToTipoDato(r))
-                            {
-                                throw new Error("Tipo dato. No está permitido asignar un valor " + maximoTipo + " a una variable " + Variable.valorToTipoDato(r), log, linea, columna);
-                            }
-                            v.setValor(r);
+                            r = convertirAscii(r);
+                            s.Push(r);
+                            v.setValor(r, maximoTipo);
                         }
                         else
                         {
@@ -128,10 +127,6 @@ namespace Emulador
                         string? r = Console.ReadLine();
                         if (float.TryParse(r, out float valor))
                         {
-                            if (maximoTipo > Variable.valorToTipoDato(valor))
-                            {
-                                throw new Error("Tipo dato. No está permitido asignar un valor " + maximoTipo + " a una variable " + Variable.valorToTipoDato(valor), log, linea, columna);
-                            }
                             v.setValor(valor);
                         }
                         else
@@ -262,11 +257,16 @@ namespace Emulador
                         match("Read");
                         match("(");
                         int valorLeido = Console.Read();
-                        if (maximoTipo > Variable.valorToTipoDato(valorLeido))
+                        if (valorLeido >= 48 && valorLeido <= 57)
                         {
-                            throw new Error("Tipo dato. No está permitido asignar un valor " + maximoTipo + " a una variable " + Variable.valorToTipoDato(valorLeido), log, linea, columna);
+                            valorLeido = convertirAscii(valorLeido);
+                            s.Push(valorLeido);
+                            v.setValor(valorLeido, maximoTipo);
                         }
-                        v.setValor(valorLeido);
+                        else
+                        {
+                            throw new Error("Semántico. No se ingresó un carácter válido ", log, linea, columna);
+                        }
                     }
                     else
                     {
@@ -275,11 +275,8 @@ namespace Emulador
                         string? line = Console.ReadLine();
                         if (float.TryParse(line, out float valor))
                         {
-                            if (maximoTipo > Variable.valorToTipoDato(valor))
-                            {
-                                throw new Error("Tipo dato. No está permitido asignar un valor " + maximoTipo + " a una variable " + Variable.valorToTipoDato(valor), log, linea, columna);
-                            }
-                            v.setValor(valor);
+                            s.Push(valor);
+                            v.setValor(valor, maximoTipo);
                         }
                         else
                         {
@@ -292,11 +289,7 @@ namespace Emulador
                 {
                     Expresion();
                     r = s.Pop();
-                    if (maximoTipo > Variable.valorToTipoDato(r))
-                    {
-                        throw new Error("Tipo dato. No está permitido asignar un valor " + maximoTipo + " a una variable " + Variable.valorToTipoDato(r), log, linea, columna);
-                    }
-                    v.setValor(r);
+                    v.setValor(r, maximoTipo);
                 }
             }
             else if (Contenido == "+=")
@@ -392,18 +385,64 @@ namespace Emulador
         //While -> while(Condicion) bloqueInstrucciones | instruccion
         private void While(bool ejecuta)
         {
-            match("while");
-            match("(");
-            bool ejecutarWhile = Condicion() && ejecuta;
-            match(")");
+            int tempChar = contadorCaracteres - 6;
+            int tempLine = Lexico.linea;
 
-            if (Contenido == "{")
+            bool ejecutarWhile;
+
+            int lastPosition = 0;
+
+            match("while");
+
+            //Console.WriteLine("Contenido 1 " + Contenido);
+
+            match("(");
+
+            ejecutarWhile = Condicion() && ejecuta;
+
+            //Console.WriteLine("EjecutarWhile: " + ejecutarWhile);
+
+            match(")");
+            //match("{");
+
+            if (ejecutarWhile)
             {
-                BloqueInstrucciones(ejecutarWhile);
+                if (Contenido == "{")
+                {
+                    BloqueInstrucciones(ejecuta);
+                }
+                else
+                {
+                    Instruccion(ejecuta);
+                }
+
+                //Console.WriteLine("Contenido = " + Contenido);
+
+                lastPosition = contadorCaracteres;
+
+                archivo.DiscardBufferedData(); // Limpia el buffer
+
+                //Console.WriteLine("Contenido (Después de limpiar Buffer) = " + Contenido);
+
+                archivo.BaseStream.Seek(tempChar, SeekOrigin.Begin); // Recorre la cantidad de posiciones de tempChar e inicia desde un origen
+
+                //Console.WriteLine("Contenido (Después de Seek) = " + Contenido);
+
+                contadorCaracteres = tempChar;
+                Lexico.linea = tempLine;
+                nextToken();
+                //Console.WriteLine("Contenido 2 " + Contenido);
             }
             else
             {
-                Instruccion(ejecutarWhile);
+                if (Contenido == "{")
+                {
+                    BloqueInstrucciones(false);
+                }
+                else
+                {
+                    Instruccion(false);
+                }
             }
         }
         /*Do -> do bloqueInstrucciones | intruccion 
@@ -475,8 +514,11 @@ namespace Emulador
         {
             bool isWriteLine = false;
             string concatenaciones = "";
+            bool isEmpty = false;
+
             match("Console");
             match(".");
+
             if (Contenido == "WriteLine")
             {
                 match("WriteLine");
@@ -486,15 +528,18 @@ namespace Emulador
             {
                 match("Write");
             }
+
             match("(");
+
             if (Clasificacion == Tipos.Cadena)
             {
                 concatenaciones = Contenido.Trim('"');
                 match(Tipos.Cadena);
             }
-            else
+            else if (Clasificacion == Tipos.Identificador)
             {
                 Variable? v = l.Find(var => var.Nombre == Contenido);
+
                 if (v == null)
                 {
                     throw new Error("Sintaxis. La variable " + Contenido + " no está definida", log, linea, columna);
@@ -505,18 +550,32 @@ namespace Emulador
                     match(Tipos.Identificador);
                 }
             }
+            else
+            {
+                isEmpty = true;
+            }
+
             if (Contenido == "+")
             {
                 //match("+");
                 concatenaciones += Concatenaciones();  // Se acumula el resultado de las concatenaciones
             }
+
             match(")");
             match(";");
+
             if (ejecuta)
             {
                 if (isWriteLine)
                 {
-                    Console.WriteLine(concatenaciones);
+                    if (!isEmpty)
+                    {
+                        Console.WriteLine(concatenaciones);
+                    }
+                    else
+                    {
+                        Console.WriteLine();
+                    }
                 }
                 else
                 {
@@ -528,6 +587,7 @@ namespace Emulador
         private string Concatenaciones()
         {
             string resultado = "";
+
             if (Clasificacion == Tipos.Identificador)
             {
                 Variable? v = l.Find(variable => variable.Nombre == Contenido);
@@ -605,9 +665,11 @@ namespace Emulador
                 string operador = Contenido;
                 match(Tipos.OperadorFactor);
                 Factor();
+                
                 //Console.Write(operador + " ");
                 float n1 = s.Pop();
                 float n2 = s.Pop();
+
                 switch (operador)
                 {
                     case "*": s.Push(n2 * n1); break;
@@ -696,12 +758,25 @@ namespace Emulador
             switch (nombreExpresion)
             {
                 case "ceil": return (float)Math.Ceiling(resultado);
-                case "pow": return (float)Math.Pow(resultado, 2);
+                case "pow": return (int)Math.Pow(resultado, 2);
                 case "sqrt": return (float)Math.Sqrt(resultado);
                 case "exp": return (float)Math.Exp(resultado);
                 case "floor": return (float)Math.Floor(resultado);
-                /*case "max": return (float)Math.Max(resultado);
-                Retorna el valor mayor entre dos valores, pero solo queremos ingresar uno*/
+                case "max":
+                /*if (resultado >= 0 && resultado <= 255)
+                {
+                    VALORMAX_TIPODATO = 255;
+                    return (char)Math.Max(VALORMAX_TIPODATO, resultado);
+                }
+                else if (resultado > 255 && resultado <= 65535)
+                {
+                    VALORMAX_TIPODATO = 65535;
+                    return (char)Math.Max(VALORMAX_TIPODATO, resultado);
+                }
+                else
+                {
+                    return (float)Math.Max(VALORMAX_TIPODATO, resultado);
+                }*/
                 case "abs": return Math.Abs(resultado);
                 case "log10": return (float)Math.Log10(resultado);
                 case "log2": return (float)Math.Log2(resultado);
@@ -710,6 +785,10 @@ namespace Emulador
                 case "round": return (float)Math.Round(resultado);
             }
             return resultado;
+        }
+        private int convertirAscii(int valor)
+        {
+            return valor - 48;
         }
         /*SNT = Producciones = Invocar el metodo
         ST  = Tokens (Contenido | Classification) = Invocar match Variables -> tipo_dato Lista_identificadores; Variables?*/

@@ -32,6 +32,17 @@ namespace Emulador
                 throw new Error("Semántico. No se puede asignar un " + valorToTipoDato(valor) + " a un " + tipo + " en la variable " + nombre, Lexico.log, Lexico.linea, Lexico.columna);
             }
         }
+        public void setValor(float valor, TipoDato maximoTipo)
+        {
+            if (valorToTipoDato(valor) <= tipo)
+            {
+                this.valor = valor;
+            }
+            else
+            {
+                throw new Error("Semántico. No se puede asignar un " + maximoTipo + " a un " + tipo + " en la variable " + nombre, Lexico.log, Lexico.linea, Lexico.columna);
+            }
+        }
         public static TipoDato valorToTipoDato(float valor)
         {
             if (!float.IsInteger(valor))
