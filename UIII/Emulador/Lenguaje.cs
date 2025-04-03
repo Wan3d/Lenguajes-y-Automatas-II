@@ -2,9 +2,9 @@
 REQUERIMIENTOS:
 
 1) Excepción en el Console.Read() [DONE]
-2) Programar todas las funciones matemáticas que están en Léxico en la función matemática de Lenguaje [%]
+2) Programar todas las funciones matemáticas que están en Léxico en la función matemática de Lenguaje [DONE]
 3) Programar el método For. La segunda asignación del for (incremento) debe de ejecutarse después del bloque de instrucciones | instrucción
-4) Programar el método While [%]
+4) Programar el método While [DONE]
 */
 
 using System;
@@ -235,9 +235,12 @@ namespace Emulador
             match(Tipos.Identificador);
             if (Contenido == "++")
             {
+                //Console.WriteLine("Antes de match '++', Contenido = " + Contenido);
                 match("++");
+                //Console.WriteLine("Después de match '++', Contenido = " + Contenido);
                 r = v.Valor + 1;
                 v.setValor(r);
+                //Console.WriteLine($"Actualización: {v.Nombre} = {v.Valor}");
             }
             else if (Contenido == "--")
             {
@@ -387,58 +390,40 @@ namespace Emulador
         {
             int tempChar = contadorCaracteres - 6;
             int tempLine = Lexico.linea;
-            bool ejecutarWhile;
 
             match("while");
-
-            //Console.WriteLine("Contenido 1 " + Contenido);
-
             match("(");
 
-            ejecutarWhile = Condicion() && ejecuta;
-
-            //Console.WriteLine("EjecutarWhile: " + ejecutarWhile);
+            bool ejecutarWhile = Condicion() && ejecuta;
 
             match(")");
-            //match("{");
 
-            if (ejecutarWhile)
+            // Esta variable servirá para verificar y controlar la ejecución de los bloques
+            // Si es true, se ejecutará como de costumbre
+            // Si es false, significa que ya no se debe ejecutar el while
+            // Así que, el parámetro que pasa es false y ya no se ejecutan las instrucciones
+            // Se hace de esta forma para que, en caso de ser false, matcheará la llave cerrada y abierta
+            // Y seguirá con el código res
+            bool ejecutarBloque = ejecutarWhile;
+
+            if (Contenido == "{")
             {
-                if (Contenido == "{")
-                {
-                    BloqueInstrucciones(ejecuta);
-                }
-                else
-                {
-                    Instruccion(ejecuta);
-                }
-
-                //Console.WriteLine("lastPosition = " + lastPosition);
-                //Console.WriteLine("Contenido = " + Contenido);
-
-                archivo.DiscardBufferedData(); // Limpia el buffer
-
-                //Console.WriteLine("Contenido (Después de limpiar Buffer) = " + Contenido);
-
-                archivo.BaseStream.Seek(tempChar, SeekOrigin.Begin); // Recorre la cantidad de posiciones de tempChar e inicia desde un origen
-
-                //Console.WriteLine("Contenido (Después de Seek) = " + Contenido);
-
-                contadorCaracteres = tempChar;
-                Lexico.linea = tempLine;
-                nextToken();
-                //Console.WriteLine("Contenido 2 " + Contenido);
+                BloqueInstrucciones(ejecutarBloque);
             }
             else
             {
-                if (Contenido == "{")
-                {
-                    BloqueInstrucciones(false);
-                }
-                else
-                {
-                    Instruccion(false);
-                }
+                Instruccion(ejecutarBloque);
+            }
+
+            // Si la condición sigue siendo true, se reajusta nuevamente la posición del apuntador y los caracteres
+            // Luego se consume el token para que empiece nuevamente a matchear el while y repita el procedimiento...
+            if (ejecutarWhile)
+            {
+                archivo.DiscardBufferedData();
+                archivo.BaseStream.Seek(tempChar, SeekOrigin.Begin);
+                contadorCaracteres = tempChar;
+                Lexico.linea = tempLine;
+                nextToken();
             }
         }
         /*Do -> do bloqueInstrucciones | intruccion 
@@ -488,22 +473,60 @@ namespace Emulador
         BloqueInstrucciones | Intruccion*/
         private void For(bool ejecuta)
         {
-            bool ejecutarFor;
+            int tempChar = contadorCaracteres - 4;  // Guarda la posición para volver después al principio
+            int tempLine = Lexico.linea;
+
+            Console.WriteLine("Contenido " + Contenido);
+
             match("for");
             match("(");
+
             Asignacion();
+
             match(";");
-            ejecutarFor = Condicion() && ejecuta;
+
+            bool ejecutarFor = Condicion() && ejecuta;
+
             match(";");
+            Console.WriteLine($"Contenido antes de Asignacion(): {Contenido}");
+            int tempChar2 = contadorCaracteres;
+            int lineTemp2 = Lexico.linea;
+            Console.WriteLine($"Linea de Asignacion: {tempChar2}");
             Asignacion();
+
             match(")");
+
+            bool ejecutarBloque = ejecutarFor;
+
             if (Contenido == "{")
             {
-                BloqueInstrucciones(ejecuta);
+                BloqueInstrucciones(ejecutarBloque);
             }
             else
             {
-                Instruccion(ejecuta);
+                Instruccion(ejecutarBloque);
+            }
+
+            if (ejecutarFor)
+            {
+                Console.WriteLine("Antes" + Contenido);
+                // Restaurar la posición justo antes de la segunda Asignacion()
+                archivo.BaseStream.Seek(tempChar2, SeekOrigin.Begin);
+                archivo.DiscardBufferedData(); // Asegura que la lectura empiece correctamente
+
+                contadorCaracteres = tempChar2;
+                Lexico.linea = lineTemp2;
+
+                nextToken(); // Para sincronizar el valor de Contenido con la nueva posición
+                Console.WriteLine("Después" + Contenido);
+                Asignacion();
+
+
+                /*archivo.DiscardBufferedData();
+                archivo.BaseStream.Seek(tempChar, SeekOrigin.Begin);
+                contadorCaracteres = tempChar;
+                Lexico.linea = tempLine;
+                nextToken();*/
             }
         }
         //Console -> Console.(WriteLine|Write) (cadena? concatenaciones?);
@@ -760,20 +783,14 @@ namespace Emulador
                 case "exp": return (float)Math.Exp(resultado);
                 case "floor": return (float)Math.Floor(resultado);
                 case "max":
-                /*if (resultado >= 0 && resultado <= 255)
-                {
-                    VALORMAX_TIPODATO = 255;
-                    return (char)Math.Max(VALORMAX_TIPODATO, resultado);
-                }
-                else if (resultado > 255 && resultado <= 65535)
-                {
-                    VALORMAX_TIPODATO = 65535;
-                    return (char)Math.Max(VALORMAX_TIPODATO, resultado);
-                }
-                else
-                {
-                    return (float)Math.Max(VALORMAX_TIPODATO, resultado);
-                }*/
+                    int maxTipo = 0;
+                    Variable.TipoDato tipo = Variable.valorToTipoDato(resultado);
+                    switch (tipo)
+                    {
+                        case Variable.TipoDato.Int: maxTipo = 65535; break;
+                        case Variable.TipoDato.Char: maxTipo = 255; break;
+                    }
+                    return Math.Max(maxTipo, resultado);
                 case "abs": return Math.Abs(resultado);
                 case "log10": return (float)Math.Log10(resultado);
                 case "log2": return (float)Math.Log2(resultado);
