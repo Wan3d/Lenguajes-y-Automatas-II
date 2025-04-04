@@ -240,7 +240,7 @@ namespace Emulador
                 //Console.WriteLine("Después de match '++', Contenido = " + Contenido);
                 r = v.Valor + 1;
                 v.setValor(r);
-                Console.WriteLine($"Actualización: {v.Nombre} = {v.Valor}");
+                //Console.WriteLine($"Actualización: {v.Nombre} = {v.Valor}");
             }
             else if (Contenido == "--")
             {
@@ -419,11 +419,7 @@ namespace Emulador
             // Luego se consume el token para que empiece nuevamente a matchear el while y repita el procedimiento...
             if (ejecutarWhile)
             {
-                archivo.DiscardBufferedData();
-                archivo.BaseStream.Seek(tempChar, SeekOrigin.Begin);
-                contadorCaracteres = tempChar;
-                Lexico.linea = tempLine;
-                nextToken();
+                setPosicion(tempChar, tempLine);
             }
         }
         /*Do -> do bloqueInstrucciones | intruccion 
@@ -461,11 +457,7 @@ namespace Emulador
 
                 if (ejecutarDo)
                 {
-                    archivo.DiscardBufferedData();
-                    archivo.BaseStream.Seek(tempChar, SeekOrigin.Begin);
-                    contadorCaracteres = tempChar;
-                    Lexico.linea = tempLine;
-                    nextToken();
+                    setPosicion(tempChar, tempLine);
                 }
             } while (ejecutarDo);
         }
@@ -512,36 +504,40 @@ namespace Emulador
                 nextToken();
             }
 
+            int finalBloqueInstrucciones = contadorCaracteres - 2;
+            int lineaFinalBloqueInstrucciones = Lexico.linea;
+
             while (ejecutarFor)
             {
-                archivo.DiscardBufferedData();
-                archivo.BaseStream.Seek(inicioBloqueInstrucciones, SeekOrigin.Begin);
-                contadorCaracteres = inicioBloqueInstrucciones;
-                Lexico.linea = lineaBloqueInstrucciones;
-                nextToken();
+                setPosicion(inicioBloqueInstrucciones, lineaBloqueInstrucciones);
                 if (Contenido == "{") BloqueInstrucciones(ejecuta);
                 else Instruccion(ejecuta);
 
-                archivo.DiscardBufferedData();
-                archivo.BaseStream.Seek(inicioTercerBloqueFor, SeekOrigin.Begin);
-                contadorCaracteres = inicioTercerBloqueFor;
-                Lexico.linea = lineaTercerBloqueFor;
-                nextToken();
+                setPosicion(inicioFor, lineaInicioFor);
+
+                setPosicion(inicioSegundoBloqueFor, lineaSegundoBloqueFor);
+                ejecutarFor = Condicion() && ejecuta;
+
+                setPosicion(inicioTercerBloqueFor, lineaTercerBloqueFor);
                 Asignacion();
 
-                archivo.DiscardBufferedData();
-                archivo.BaseStream.Seek(inicioFor, SeekOrigin.Begin);
-                contadorCaracteres = inicioFor;
-                Lexico.linea = lineaInicioFor;
-                nextToken();
+                Console.WriteLine($"Contenido (Después de Asignación) = {Contenido}");
 
-                archivo.DiscardBufferedData();
-                archivo.BaseStream.Seek(inicioSegundoBloqueFor, SeekOrigin.Begin);
-                contadorCaracteres = inicioSegundoBloqueFor;
-                Lexico.linea = lineaSegundoBloqueFor;
-                nextToken();
-                ejecutarFor = Condicion() && ejecuta;
+                if (Contenido == ")")
+                {
+                    nextToken();
+                    if (Contenido == "{") BloqueInstrucciones(false);
+                    else Instruccion(false);
+                }
             }
+        }
+        private void setPosicion(int posicion, int linea)
+        {
+            archivo.DiscardBufferedData();
+            archivo.BaseStream.Seek(posicion, SeekOrigin.Begin);
+            contadorCaracteres = posicion;
+            Lexico.linea = linea;
+            nextToken();
         }
         //Console -> Console.(WriteLine|Write) (cadena? concatenaciones?);
         private void console(bool ejecuta)

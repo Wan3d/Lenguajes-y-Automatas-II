@@ -1,5 +1,5 @@
 Archivo: prueba.cpp
-Fecha y hora: 03/04/2025 23:26:12
+Fecha y hora: 04/04/2025 1:31:21
 ----------------------------------
 Constructor lenguaje
-Error: Sintaxis: La variable ; no está definida en la linea [17] en la columna [21]
+Error: Sintaxis. Se espera un ( en la linea [19] en la columna [21]

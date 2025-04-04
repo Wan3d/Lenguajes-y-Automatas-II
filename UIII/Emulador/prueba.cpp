@@ -9,14 +9,18 @@ static void Main(string[] args)
     float res;
     i = 0;
     // x = Console.ReadLine();
-    x = Console.Read();
+    x = Console.ReadLine();
     int cont;
     int altura = 10;
     i = 0;
 
     for (i = 0; i <= x; i++)
     {
-        Console.WriteLine(i);
+        for (j = 0; j <= i; j++)
+        {
+            Console.Write("*");
+        }
+        Console.WriteLine();
     }
     i = 1;
     while (i <= x)
