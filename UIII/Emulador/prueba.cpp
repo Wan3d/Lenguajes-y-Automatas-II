@@ -16,7 +16,7 @@ static void Main(string[] args)
 
     for (i = 0; i <= x; i++)
     {
-        Console.WriteLine("Nooo");
+        Console.WriteLine(i);
     }
     i = 1;
     while (i <= x)

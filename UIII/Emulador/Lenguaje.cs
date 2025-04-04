@@ -240,7 +240,7 @@ namespace Emulador
                 //Console.WriteLine("Después de match '++', Contenido = " + Contenido);
                 r = v.Valor + 1;
                 v.setValor(r);
-                //Console.WriteLine($"Actualización: {v.Nombre} = {v.Valor}");
+                Console.WriteLine($"Actualización: {v.Nombre} = {v.Valor}");
             }
             else if (Contenido == "--")
             {
@@ -473,16 +473,16 @@ namespace Emulador
         BloqueInstrucciones | Intruccion*/
         private void For(bool ejecuta)
         {
-            int tempChar = contadorCaracteres - 4;  // Guarda la posición para volver después al principio
-            int tempLine = Lexico.linea;
+            int inicioFor = contadorCaracteres - 4;  // Guarda la posición para volver después al principio
+            int lineaInicioFor = Lexico.linea;
 
             match("for");
             match("(");
 
             Asignacion();
 
-            int inicioSegundoBloque = contadorCaracteres - 1;
-            int lineaSegundoBloque = Lexico.linea;
+            int inicioSegundoBloqueFor = contadorCaracteres - 1;
+            int lineaSegundoBloqueFor = Lexico.linea;
             match(";");
 
             //Console.WriteLine($"Contenido (Antes de condición) = {Contenido}");
@@ -490,8 +490,8 @@ namespace Emulador
             //Console.WriteLine($"Contenido (Después de condición) = {Contenido}");
 
             // Se guarda la posición antes de consumir la tercera parte del For
-            int inicioTercerBloque = contadorCaracteres - 1;
-            int lineaTercerBloque = Lexico.linea;
+            int inicioTercerBloqueFor = contadorCaracteres - 1;
+            int lineaTercerBloqueFor = Lexico.linea;
             //Console.WriteLine($"Contenido (Antes de guardar la posición) = {Contenido} // Número de caracter = {lineaTercerBloque}");
             match(";");
             //Asignacion();
@@ -503,67 +503,44 @@ namespace Emulador
 
             match(")");
 
-            //bool ejecutarBloque = ejecutarFor;
-
             int inicioBloqueInstrucciones = contadorCaracteres - 2;
             int lineaBloqueInstrucciones = Lexico.linea;
             //Console.WriteLine($"Probando caracter = {Contenido}");
 
-            if (Contenido == "{")
+            while (Contenido != "}")
             {
-                BloqueInstrucciones(ejecuta);
-            }
-            else
-            {
-                Instruccion(ejecuta);
+                nextToken();
             }
 
             while (ejecutarFor)
             {
                 archivo.DiscardBufferedData();
-                archivo.BaseStream.Seek(inicioTercerBloque, SeekOrigin.Begin);
-                contadorCaracteres = inicioTercerBloque;
-                Lexico.linea = lineaTercerBloque;
-                nextToken();
-                //Console.WriteLine($"Contenido (Después de cambiar el puntero) = {Contenido}");
-                Asignacion();
-                //Console.WriteLine($"Contenido (Después de llamar Asignacion) = {Contenido}");
-
-                archivo.DiscardBufferedData();
-                archivo.BaseStream.Seek(inicioSegundoBloque, SeekOrigin.Begin);
-                contadorCaracteres = inicioSegundoBloque;
-                Lexico.linea = lineaSegundoBloque;
-                nextToken();
-                ejecutarFor = Condicion() && ejecuta;
-                //Console.WriteLine($"Contenido (Después de ejecutarFor) = {Contenido}");
-                nextToken();
-                //Console.WriteLine($"Contenido (1 + Después de ejecutarFor) = {Contenido}");
-
-
-                archivo.DiscardBufferedData();
-                archivo.BaseStream.Seek(tempChar, SeekOrigin.Begin);
-                contadorCaracteres = tempChar;
-                Lexico.linea = tempLine;
-                //Console.WriteLine($"Contenido (Antes de consumir el token) = {Contenido}");
-                nextToken();
-                //Console.WriteLine($"Contenido (Después de volver al principio) = {Contenido}");
-                //Console.WriteLine("TERMINÓ LA CONDICIÓN");
-
-                archivo.DiscardBufferedData();
                 archivo.BaseStream.Seek(inicioBloqueInstrucciones, SeekOrigin.Begin);
                 contadorCaracteres = inicioBloqueInstrucciones;
                 Lexico.linea = lineaBloqueInstrucciones;
                 nextToken();
-                //Console.WriteLine($"Contenido (Después de volver al inicio del bloque) = {Contenido}");
-                if (Contenido == "{")
-                {
-                    BloqueInstrucciones(ejecuta);
-                }
-                else
-                {
-                    Instruccion(ejecuta);
-                }
-                
+                if (Contenido == "{") BloqueInstrucciones(ejecuta);
+                else Instruccion(ejecuta);
+
+                archivo.DiscardBufferedData();
+                archivo.BaseStream.Seek(inicioTercerBloqueFor, SeekOrigin.Begin);
+                contadorCaracteres = inicioTercerBloqueFor;
+                Lexico.linea = lineaTercerBloqueFor;
+                nextToken();
+                Asignacion();
+
+                archivo.DiscardBufferedData();
+                archivo.BaseStream.Seek(inicioFor, SeekOrigin.Begin);
+                contadorCaracteres = inicioFor;
+                Lexico.linea = lineaInicioFor;
+                nextToken();
+
+                archivo.DiscardBufferedData();
+                archivo.BaseStream.Seek(inicioSegundoBloqueFor, SeekOrigin.Begin);
+                contadorCaracteres = inicioSegundoBloqueFor;
+                Lexico.linea = lineaSegundoBloqueFor;
+                nextToken();
+                ejecutarFor = Condicion() && ejecuta;
             }
         }
         //Console -> Console.(WriteLine|Write) (cadena? concatenaciones?);
