@@ -1,5 +1,11 @@
 Archivo: prueba.cpp
-Fecha y hora: 02/04/2025 23:54:34
+Fecha y hora: 03/04/2025 21:55:06
 ----------------------------------
 Constructor lenguaje
-Error: Sintaxis: La variable + no está definida en la linea [17] en la columna [3]
+Lista de variables: 
+x Float 4
+i Float 6
+j Float 2
+res Float 0
+cont Int 0
+altura Int 10

@@ -14,11 +14,11 @@ static void Main(string[] args)
     int altura = 10;
     i = 0;
 
-    for (i = 1; i < x; i++)
+    for (i = 0; i <= x; i++)
     {
-        Console.WriteLine(i);
+        Console.WriteLine("Nooo");
     }
-    /*i = 1;
+    i = 1;
     while (i <= x)
     {
         j = 1;
@@ -32,7 +32,7 @@ static void Main(string[] args)
         }
         i++;
         Console.WriteLine();
-    }*/
+    }
     /*Console.WriteLine("Altura = " + altura);
     i = 0;
     while (i < x)
