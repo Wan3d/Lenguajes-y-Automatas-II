@@ -485,18 +485,21 @@ namespace Emulador
             do
             {
                 ejecutarFor = Condicion() && ejecuta;
-                match(";");
-
+                
                 int inicioTercerBloque = contadorCaracteres;
                 int lineaInicioTercerBloque = Lexico.linea;
-                Asignacion();
+                match(";");
+
+                while (Contenido != ")") nextToken();
                 match(")");
 
                 if (Contenido == "{") BloqueInstrucciones(ejecutarFor);
                 else Instruccion(ejecutarFor);
 
-
                 if (ejecutarFor){
+                    setPosicion(inicioTercerBloque, lineaInicioTercerBloque);
+                    Asignacion();
+                    
                     setPosicion(inicioSegundoBloque, lineaInicioSegundoBloque);
                 }
 

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Emulador")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7fb895f4cc519ff753e4b9f1dfdeba049d5dddc7")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a78aea7178f9472c99406be2efb48300b0631c4b")]
 [assembly: System.Reflection.AssemblyProductAttribute("Emulador")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Emulador")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

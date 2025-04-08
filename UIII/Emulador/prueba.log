@@ -1,11 +1,11 @@
 Archivo: prueba.cpp
-Fecha y hora: 07/04/2025 19:46:48
+Fecha y hora: 07/04/2025 20:09:39
 ----------------------------------
 Constructor lenguaje
 Lista de variables: 
-random Int 47
-l Int 11
-m Int 12
+random Int 87
+l Int 10
+m Int 11
 n Char 0
 p Int 0
 altura Float 5
@@ -16,6 +16,6 @@ y Float 10
 z Float 2
 c Float 44
 height Int 5
-k Int 6
-spaces Int 1
-asteristics Int 1
+k Int 5
+spaces Int 0
+asteristics Int 0
