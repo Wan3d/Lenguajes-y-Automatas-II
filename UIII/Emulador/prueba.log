@@ -1,5 +1,21 @@
 Archivo: prueba.cpp
-Fecha y hora: 04/04/2025 1:31:21
+Fecha y hora: 07/04/2025 19:46:48
 ----------------------------------
 Constructor lenguaje
-Error: Sintaxis. Se espera un ( en la linea [19] en la columna [21]
+Lista de variables: 
+random Int 47
+l Int 11
+m Int 12
+n Char 0
+p Int 0
+altura Float 5
+i Float 10
+j Float 2
+x Float 55
+y Float 10
+z Float 2
+c Float 44
+height Int 5
+k Int 6
+spaces Int 1
+asteristics Int 1

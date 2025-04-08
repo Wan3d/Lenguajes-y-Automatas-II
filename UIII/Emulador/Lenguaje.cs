@@ -235,18 +235,24 @@ namespace Emulador
             match(Tipos.Identificador);
             if (Contenido == "++")
             {
+                //if (ejecuta)
+                //{
                 //Console.WriteLine("Antes de match '++', Contenido = " + Contenido);
                 match("++");
                 //Console.WriteLine("Después de match '++', Contenido = " + Contenido);
                 r = v.Valor + 1;
                 v.setValor(r);
                 //Console.WriteLine($"Actualización: {v.Nombre} = {v.Valor}");
+                //}
             }
             else if (Contenido == "--")
             {
+                //if (ejecuta)
+                //{
                 match("--");
                 r = v.Valor - 1;
                 v.setValor(r);
+                //}
             }
             else if (Contenido == "=")
             {
@@ -465,71 +471,36 @@ namespace Emulador
         BloqueInstrucciones | Intruccion*/
         private void For(bool ejecuta)
         {
-            int inicioFor = contadorCaracteres - 4;  // Guarda la posición para volver después al principio
+            int inicioFor = contadorCaracteres - 4;
             int lineaInicioFor = Lexico.linea;
-
+            bool ejecutarFor;
             match("for");
             match("(");
-
             Asignacion();
 
-            int inicioSegundoBloqueFor = contadorCaracteres - 1;
-            int lineaSegundoBloqueFor = Lexico.linea;
+            int inicioSegundoBloque = contadorCaracteres;
+            int lineaInicioSegundoBloque = Lexico.linea;
             match(";");
 
-            //Console.WriteLine($"Contenido (Antes de condición) = {Contenido}");
-            bool ejecutarFor = Condicion() && ejecuta;
-            //Console.WriteLine($"Contenido (Después de condición) = {Contenido}");
-
-            // Se guarda la posición antes de consumir la tercera parte del For
-            int inicioTercerBloqueFor = contadorCaracteres - 1;
-            int lineaTercerBloqueFor = Lexico.linea;
-            //Console.WriteLine($"Contenido (Antes de guardar la posición) = {Contenido} // Número de caracter = {lineaTercerBloque}");
-            match(";");
-            //Asignacion();
-
-            while (Contenido != ")")
+            do
             {
-                nextToken();
-            }
-
-            match(")");
-
-            int inicioBloqueInstrucciones = contadorCaracteres - 2;
-            int lineaBloqueInstrucciones = Lexico.linea;
-            //Console.WriteLine($"Probando caracter = {Contenido}");
-
-            while (Contenido != "}")
-            {
-                nextToken();
-            }
-
-            int finalBloqueInstrucciones = contadorCaracteres - 2;
-            int lineaFinalBloqueInstrucciones = Lexico.linea;
-
-            while (ejecutarFor)
-            {
-                setPosicion(inicioBloqueInstrucciones, lineaBloqueInstrucciones);
-                if (Contenido == "{") BloqueInstrucciones(ejecuta);
-                else Instruccion(ejecuta);
-
-                setPosicion(inicioFor, lineaInicioFor);
-
-                setPosicion(inicioSegundoBloqueFor, lineaSegundoBloqueFor);
                 ejecutarFor = Condicion() && ejecuta;
+                match(";");
 
-                setPosicion(inicioTercerBloqueFor, lineaTercerBloqueFor);
+                int inicioTercerBloque = contadorCaracteres;
+                int lineaInicioTercerBloque = Lexico.linea;
                 Asignacion();
+                match(")");
 
-                Console.WriteLine($"Contenido (Después de Asignación) = {Contenido}");
+                if (Contenido == "{") BloqueInstrucciones(ejecutarFor);
+                else Instruccion(ejecutarFor);
 
-                if (Contenido == ")")
-                {
-                    nextToken();
-                    if (Contenido == "{") BloqueInstrucciones(false);
-                    else Instruccion(false);
+
+                if (ejecutarFor){
+                    setPosicion(inicioSegundoBloque, lineaInicioSegundoBloque);
                 }
-            }
+
+            } while (ejecutarFor);
         }
         private void setPosicion(int posicion, int linea)
         {
