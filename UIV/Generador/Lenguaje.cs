@@ -9,12 +9,9 @@ namespace Generador
 {
     public class Lenguaje : Sintaxis
     {
-        public Lenguaje(string nombre = "prueba.cpp") : base(nombre)
+        public Lenguaje(string nombre = "gram.txt") : base(nombre)
         {
-            log.WriteLine("Constructor lenguaje");
-        }
-        public int Programa(){
-            return 0;
+
         }
     }
 }

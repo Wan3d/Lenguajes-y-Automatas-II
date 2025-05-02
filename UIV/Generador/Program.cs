@@ -11,9 +11,12 @@ namespace Generador
         {
             try
             {
-                using (Lenguaje lexico = new())
+                using (Lenguaje l = new())
                 {
-                    lexico.Programa();
+                    while (!l.finArchivo())
+                    {
+                        l.nextToken();
+                    }
                 }
             }
             catch (Exception e)

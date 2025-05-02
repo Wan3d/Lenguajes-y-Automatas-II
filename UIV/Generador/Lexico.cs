@@ -16,28 +16,34 @@ namespace Generador
     {
         protected StreamReader archivo;
         public static StreamWriter log = null!;
-        public StreamWriter asm;
         public static int linea = 1;
         const int F = -1;
-        const int E = -2;
         protected int contadorCaracteres;
         public static int columna = 1;
         readonly int[,] TRAND = {
-
+            {0,  1,  2, 10,  4, 10, 10, 10, 10, 10, 10}, // 0
+            {F,  1,  F,  F,  F,  F,  F,  F,  F,  F,  F}, // 1
+            {F,  F,  F,  3,  F,  F,  F,  F,  F,  F,  F}, // 2
+            {F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F}, // 3
+            {F,  F,  F,  F,  F,  5,  6,  7,  8,  9,  F}, // 4
+            {F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F}, // 5
+            {F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F}, // 6
+            {F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F}, // 7
+            {F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F}, // 8
+            {F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F}, // 9
+            {F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F}, // 10
         };
-        public Lexico(string nombreArchivo)
+        public Lexico(string nombreArchivo = "gram.txt")
         {
             contadorCaracteres = 1;
             string nombreArchivoWithoutExt = Path.GetFileNameWithoutExtension(nombreArchivo);   //Obtenemos el nombre del archivo sin la extensión para poder crear el .log y .asm
             log = new StreamWriter(nombreArchivoWithoutExt + ".log");
-            if (File.Exists($"C:\\Users\\zullo\\OneDrive\\Escritorio\\V - Semestre\\Lenguajes y Automatas II\\Proyectos\\UIII\\Emulador\\{nombreArchivo}"))
+            if (File.Exists($"{nombreArchivo}"))
             {
-                if (Path.GetExtension(nombreArchivo) == ".cpp")
+                if (Path.GetExtension($"{nombreArchivo}") == ".txt")
                 {
-                    asm = new StreamWriter(nombreArchivoWithoutExt + ".asm");
                     log.AutoFlush = true;
-                    asm.AutoFlush = true;
-                    archivo = new StreamReader($"C:\\Users\\zullo\\OneDrive\\Escritorio\\V - Semestre\\Lenguajes y Automatas II\\Proyectos\\UIII\\Emulador\\{nombreArchivo}");
+                    archivo = new StreamReader(nombreArchivo);
                     DateTime ahora = DateTime.Now;
                     log.WriteLine("Archivo: " + nombreArchivo);
                     log.WriteLine("Fecha y hora: " + ahora.ToString());
@@ -57,18 +63,35 @@ namespace Generador
         {
             archivo.Close();
             log.Close();
-            asm.Close();
         }
-
         private int Columna(char c)
         {
-            return 0;
+            if (char.IsWhiteSpace(c)) return 0;
+            else if (char.IsLetter(c)) return 1;
+            else if (c == '-') return 2;
+            else if (c == '>') return 3;
+            else if (c == '\'') return 4;
+            else if (c == ';') return 5;
+            else if (c == '?') return 6;
+            else if (c == '|') return 7;
+            else if (c == '(') return 8;
+            else if (c == ')') return 9;
+            else return 10;
         }
         private void Clasifica(int estado)
         {
             switch (estado)
             {
-                default: break;
+                case 1: Clasificacion = Tipos.SNT; break;
+                case 2: Clasificacion = Tipos.ST; break;
+                case 3: Clasificacion = Tipos.Produce; break;
+                case 4: Clasificacion = Tipos.ST; break;
+                case 5: Clasificacion = Tipos.FinProduccion; break;
+                case 6: Clasificacion = Tipos.Optativo; break;
+                case 7: Clasificacion = Tipos.OR; break;
+                case 8: Clasificacion = Tipos.InicioAgrupacion; break;
+                case 9: Clasificacion = Tipos.CierreAgrupacion; break;
+                case 10: Clasificacion = Tipos.ST; break;
             }
         }
         public void nextToken()
@@ -104,11 +127,9 @@ namespace Generador
                     }
                 }
             }
-            if (estado == E)
-            {
-                throw new Error("léxico, se espera fin de comentario", log, linea, columna);
-            }
             Contenido = buffer;
+            if (Clasificacion == Tipos.SNT && char.IsLower(Contenido[0])) Clasificacion = Tipos.ST;
+            log.WriteLine(Contenido + " = " + Clasificacion);
         }
         public bool finArchivo()
         {

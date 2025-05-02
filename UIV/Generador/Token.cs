@@ -22,16 +22,16 @@ namespace Generador
     {
         public enum Tipos
         {
-            SNT,                    // SNT -> L+ (una o más letras) --Empieza con mayúscula 
-            ST,                     // ST -> L+ (una o más letras)  --No empieza con mayúscula
-                                    // ST -> Palabras reservadas de Tokens
-                                    // ST -> Lambda
-            Produce,                // Produce -> -> 
-            FinProduccion,          // FinProduccion -> \;
-            Optativo,               // Optativo -> \?
-            CierreAgrupacion,       // CierreAgrupacion -> \)
-            InicioAgrupacion,       // InicioAgrupacion -> \(
-            OR                      // OR -> \|
+            SNT,                        // SNT -> L+ (una o más letras) --Empieza con mayúscula 
+            ST,                         // ST -> L+ (una o más letras)  --No empieza con mayúscula
+                                        // ST -> Palabras reservadas de Tokens
+                                        // ST -> Lambda
+            Produce,                    // Produce -> -> 
+            FinProduccion,              // FinProduccion -> \;
+            Optativo,                   // Optativo -> \?
+            CierreAgrupacion,           // CierreAgrupacion -> \)
+            InicioAgrupacion,           // InicioAgrupacion -> \(
+            OR                          // OR -> \|
         }
         private string contenido;
         private Tipos clasificacion;

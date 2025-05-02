@@ -7,7 +7,7 @@ namespace Generador
 {
     public class Sintaxis : Lexico
     {
-        public Sintaxis(string nombre) : base(nombre)
+        public Sintaxis(string nombre = "gram.txt") : base(nombre)
         {
             nextToken();
         }
