@@ -1,0 +1,44 @@
+Archivo: gram.txt
+Fecha y hora: 02/05/2025 0:15:46
+----------------------------------
+Lenguaje = SNT
+: = ST
+Go = SNT
+; = ST
+Programa = SNT
+-> = Produce
+A = SNT
+B = SNT
+C = SNT
+\ = ST
+; = ST
+A = SNT
+-> = Produce
+\ = ST
+( = ST
+# = ST
+include = ST
+Identificador = SNT
+\ = ST
+) = ST
+\ = ST
+; = ST
+B = SNT
+-> = Produce
+printf = ST
+( = ST
+Cadena = SNT
+\ = ST
+? = ST
+) = ST
+; = ST
+\ = ST
+; = ST
+C = SNT
+-> = Produce
+a = ST
+\ = ST
+| = ST
+b = ST
+\ = ST
+; = ST

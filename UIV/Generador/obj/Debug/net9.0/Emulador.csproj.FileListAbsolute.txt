@@ -1,0 +1,15 @@
+C:\Users\zullo\OneDrive\Escritorio\V - Semestre\Lenguajes y Automatas II\Proyectos\UIII\Emulador\bin\Debug\net9.0\Emulador.exe
+C:\Users\zullo\OneDrive\Escritorio\V - Semestre\Lenguajes y Automatas II\Proyectos\UIII\Emulador\bin\Debug\net9.0\Emulador.deps.json
+C:\Users\zullo\OneDrive\Escritorio\V - Semestre\Lenguajes y Automatas II\Proyectos\UIII\Emulador\bin\Debug\net9.0\Emulador.runtimeconfig.json
+C:\Users\zullo\OneDrive\Escritorio\V - Semestre\Lenguajes y Automatas II\Proyectos\UIII\Emulador\bin\Debug\net9.0\Emulador.dll
+C:\Users\zullo\OneDrive\Escritorio\V - Semestre\Lenguajes y Automatas II\Proyectos\UIII\Emulador\bin\Debug\net9.0\Emulador.pdb
+C:\Users\zullo\OneDrive\Escritorio\V - Semestre\Lenguajes y Automatas II\Proyectos\UIII\Emulador\obj\Debug\net9.0\Emulador.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\zullo\OneDrive\Escritorio\V - Semestre\Lenguajes y Automatas II\Proyectos\UIII\Emulador\obj\Debug\net9.0\Emulador.AssemblyInfoInputs.cache
+C:\Users\zullo\OneDrive\Escritorio\V - Semestre\Lenguajes y Automatas II\Proyectos\UIII\Emulador\obj\Debug\net9.0\Emulador.AssemblyInfo.cs
+C:\Users\zullo\OneDrive\Escritorio\V - Semestre\Lenguajes y Automatas II\Proyectos\UIII\Emulador\obj\Debug\net9.0\Emulador.csproj.CoreCompileInputs.cache
+C:\Users\zullo\OneDrive\Escritorio\V - Semestre\Lenguajes y Automatas II\Proyectos\UIII\Emulador\obj\Debug\net9.0\Emulador.sourcelink.json
+C:\Users\zullo\OneDrive\Escritorio\V - Semestre\Lenguajes y Automatas II\Proyectos\UIII\Emulador\obj\Debug\net9.0\Emulador.dll
+C:\Users\zullo\OneDrive\Escritorio\V - Semestre\Lenguajes y Automatas II\Proyectos\UIII\Emulador\obj\Debug\net9.0\refint\Emulador.dll
+C:\Users\zullo\OneDrive\Escritorio\V - Semestre\Lenguajes y Automatas II\Proyectos\UIII\Emulador\obj\Debug\net9.0\Emulador.pdb
+C:\Users\zullo\OneDrive\Escritorio\V - Semestre\Lenguajes y Automatas II\Proyectos\UIII\Emulador\obj\Debug\net9.0\Emulador.genruntimeconfig.cache
+C:\Users\zullo\OneDrive\Escritorio\V - Semestre\Lenguajes y Automatas II\Proyectos\UIII\Emulador\obj\Debug\net9.0\ref\Emulador.dll

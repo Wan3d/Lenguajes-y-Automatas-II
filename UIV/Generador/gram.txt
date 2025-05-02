@@ -1,0 +1,6 @@
+Lenguaje: Go;
+
+Programa -> A B C\;
+A -> \(#include Identificador\)\;
+B -> printf(Cadena\?);\;
+C -> a \| b \;
