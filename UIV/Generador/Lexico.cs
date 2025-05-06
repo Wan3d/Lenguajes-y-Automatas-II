@@ -15,6 +15,7 @@ namespace Generador
     public class Lexico : Token, IDisposable
     {
         protected StreamReader archivo;
+        protected StreamWriter lenguaje;
         public static StreamWriter log = null!;
         public static int linea = 1;
         const int F = -1;
@@ -38,6 +39,7 @@ namespace Generador
             contadorCaracteres = 1;
             string nombreArchivoWithoutExt = Path.GetFileNameWithoutExtension(nombreArchivo);   //Obtenemos el nombre del archivo sin la extensión para poder crear el .log y .asm
             log = new StreamWriter(nombreArchivoWithoutExt + ".log");
+            lenguaje = new StreamWriter("./Generado/Lenguaje.cs");
             if (File.Exists($"{nombreArchivo}"))
             {
                 if (Path.GetExtension($"{nombreArchivo}") == ".txt")
@@ -48,6 +50,7 @@ namespace Generador
                     log.WriteLine("Archivo: " + nombreArchivo);
                     log.WriteLine("Fecha y hora: " + ahora.ToString());
                     log.WriteLine("----------------------------------");
+                    lenguaje.WriteLine("// Generado: " + ahora.ToString());
                 }
                 else
                 {
@@ -63,6 +66,7 @@ namespace Generador
         {
             archivo.Close();
             log.Close();
+            lenguaje.Close();
         }
         private int Columna(char c)
         {
@@ -70,7 +74,7 @@ namespace Generador
             else if (char.IsLetter(c)) return 1;
             else if (c == '-') return 2;
             else if (c == '>') return 3;
-            else if (c == '\'') return 4;
+            else if (c == '\\') return 4;
             else if (c == ';') return 5;
             else if (c == '?') return 6;
             else if (c == '|') return 7;
