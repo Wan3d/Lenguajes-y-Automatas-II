@@ -14,6 +14,10 @@ namespace Generador
 {
     public class Lexico : Token, IDisposable
     {
+        // Lo guardamos en bin para separar el código fuente (proyecto)
+        // de los archivos que necesita el proyecto para ejecutarse
+        // Digamos que bin es el directorio de trabajo al ejecutarse el programa
+        string rutaLenguaje = @"./bin/Lenguaje.cs";
         protected StreamReader archivo;
         protected StreamWriter lenguaje;
         public static StreamWriter log = null!;
@@ -34,12 +38,12 @@ namespace Generador
             {F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F}, // 9
             {F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F}, // 10
         };
+
         public Lexico(string nombreArchivo = "gram.txt")
         {
-            contadorCaracteres = 1;
             string nombreArchivoWithoutExt = Path.GetFileNameWithoutExtension(nombreArchivo);   //Obtenemos el nombre del archivo sin la extensión para poder crear el .log y .asm
             log = new StreamWriter(nombreArchivoWithoutExt + ".log");
-            lenguaje = new StreamWriter("./Generado/Lenguaje.cs");
+            lenguaje = new StreamWriter(rutaLenguaje);
             if (File.Exists($"{nombreArchivo}"))
             {
                 if (Path.GetExtension($"{nombreArchivo}") == ".txt")
@@ -134,6 +138,34 @@ namespace Generador
             Contenido = buffer;
             if (Clasificacion == Tipos.SNT && char.IsLower(Contenido[0])) Clasificacion = Tipos.ST;
             log.WriteLine(Contenido + " = " + Clasificacion);
+        }
+        protected bool esClasificacion(string nombre)
+        {
+            switch (nombre)
+            {
+                case "Identificador":
+                case "Numero":
+                case "Caracter":
+                case "FinSentencia":
+                case "InicioBloque":
+                case "FinBloque":
+                case "OperadorTernario":
+                case "OperadorTermino":
+                case "OperadorFactor":
+                case "IncrementoTermino":
+                case "IncrementoFactor":
+                case "Puntero":
+                case "Asignacion":
+                case "OperadorRelacional":
+                case "OperadorLogico":
+                case "Moneda":
+                case "Cadena":
+                case "TipoDato":
+                case "PalabraReservada":
+                case "FuncionMatematica":
+                    return true;
+            }
+            return false;
         }
         public bool finArchivo()
         {
