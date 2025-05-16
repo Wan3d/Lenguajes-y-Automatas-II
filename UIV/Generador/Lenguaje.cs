@@ -4,8 +4,8 @@
     2.  Agregar los métodos a una lista para validar que todos los métodos invocados (SNT),
         del lado derecho de la producción existan. [DONE]
     3.  Agregar a la estructura el símbolo con el que inicia la producción. [DONE]
-    4.  Implementar la cerradura Epsilon en agrupaciones.
-    5.  Implementar el OR. [%]
+    4.  Implementar la cerradura Epsilon en agrupaciones. [%]
+    5.  Implementar el OR. [DONE]
 */
 
 using System;
@@ -94,21 +94,19 @@ namespace Generador
             Write("{", 2);
 
             match(Tipos.Produce);
-            ListaSimbolos(function);
+            ListaSimbolos(function, true);
             match(Tipos.FinProduccion);
 
             Write("}", 2);
         }
-        private void ListaSimbolos(string function = "", int tabs = 3)
+        private void ListaSimbolos(string function = "", bool primeraVez = false, int tabs = 3)
         {
-            try
+            if (primeraVez)
             {
                 string simbolo = Contenido;
                 functions.Add(function, simbolo);
-            }
-            catch (Exception)
-            {
-                Console.WriteLine("No se pudo agregar la función");
+
+                primeraVez = false;
             }
 
             if (Clasificacion == Tipos.SNT)
@@ -129,36 +127,7 @@ namespace Generador
                         if (Clasificacion == Tipos.OR)
                         {
                             match(Tipos.OR);
-                            if (Clasificacion == Tipos.SNT && existeFuncion(Contenido))
-                            {
-                                // Falta por agregar algunas cosas
-                                // Comprobar con ciclo el simbolo de una función (?)
-                                Write($"else", tabs);
-                                Write("{", tabs);
-                                Write($"{Contenido}();", tabs + 1);
-                                Write("}", tabs);
-                                nextToken();
-                            }
-                            else if (Clasificacion == Tipos.SNT && esClasificacion(Contenido))
-                            {
-                                Write($"else", tabs);
-                                Write("{", tabs);
-                                Write($"match(Tipos.{Contenido})", tabs + 1);
-                                Write("}", tabs);
-                                nextToken();
-                            }
-                            else if (Clasificacion == Tipos.ST)
-                            {
-                                Write($"else", tabs);
-                                Write("{", tabs);
-                                Write($"match(\"{Contenido}\");", tabs + 1);
-                                Write("}", tabs);
-                                nextToken();
-                            }
-                            else
-                            {
-                                throw new Error("No se ingresó una gramática válida", log, linea, columna);
-                            }
+                            writeOr(Clasificacion, Contenido);
                         }
                         else
                         {
@@ -219,13 +188,22 @@ namespace Generador
 
                 match(Tipos.ST);
 
-                if (Clasificacion == Tipos.Optativo)
+                if (Clasificacion == Tipos.Optativo || Clasificacion == Tipos.OR)
                 {
                     Write($"if(Contenido == \"{nombre}\")", tabs);
                     Write("{", tabs);
                     Write($"match(\"{nombre}\");", tabs + 1);
                     Write("}", tabs);
-                    match(Tipos.Optativo);
+
+                    if (Clasificacion == Tipos.OR)
+                    {
+                        match(Tipos.OR);
+                        writeOr(Clasificacion, Contenido);
+                    }
+                    else
+                    {
+                        match(Tipos.Optativo);
+                    }
                 }
                 else
                 {
@@ -236,14 +214,14 @@ namespace Generador
             {
                 match(Tipos.InicioAgrupacion);
                 Write("{", tabs);
-                ListaSimbolos("", tabs + 1);
+                ListaSimbolos("", primeraVez, tabs + 1);
                 match(Tipos.CierreAgrupacion);
                 Write("}", tabs);
             }
 
             if (Clasificacion != Tipos.FinProduccion && Clasificacion != Tipos.CierreAgrupacion)
             {
-                ListaSimbolos("", tabs);
+                ListaSimbolos("", primeraVez, tabs);
             }
         }
         private void Write(string texto, int tabs = 0)
@@ -265,6 +243,39 @@ namespace Generador
                 return simbolo;
             }
             return null;
+        }
+        private void writeOr(Tipos clasificacion, string Contenido, int tabs = 3)
+        {
+            if (clasificacion == Tipos.SNT && existeFuncion(Contenido))
+            {
+                // Falta por agregar algunas cosas
+                // Comprobar con ciclo el simbolo de una función (?)
+                Write($"else", tabs);
+                Write("{", tabs);
+                Write($"{Contenido}();", tabs + 1);
+                Write("}", tabs);
+                nextToken();
+            }
+            else if (clasificacion == Tipos.SNT && esClasificacion(Contenido))
+            {
+                Write($"else", tabs);
+                Write("{", tabs);
+                Write($"match(Tipos.{Contenido})", tabs + 1);
+                Write("}", tabs);
+                nextToken();
+            }
+            else if (clasificacion == Tipos.ST)
+            {
+                Write($"else", tabs);
+                Write("{", tabs);
+                Write($"match(\"{Contenido}\");", tabs + 1);
+                Write("}", tabs);
+                nextToken();
+            }
+            else
+            {
+                throw new Error("No se ingresó una gramática válida", log, linea, columna);
+            }
         }
     }
 }
