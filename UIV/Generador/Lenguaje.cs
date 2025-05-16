@@ -103,8 +103,8 @@ namespace Generador
         {
             try
             {
-                string primerSimbolo = Contenido;
-                functions.Add(function, primerSimbolo);
+                string simbolo = Contenido;
+                functions.Add(function, simbolo);
             }
             catch (Exception)
             {
@@ -113,29 +113,73 @@ namespace Generador
 
             if (Clasificacion == Tipos.SNT)
             {
+                // En caso de venir un SNT pero una Clasificación
                 if (esClasificacion(Contenido))
                 {
                     string nombre = Contenido;
                     match(Tipos.SNT);
 
-                    if (Clasificacion == Tipos.Optativo)
+                    if (Clasificacion == Tipos.Optativo || Clasificacion == Tipos.OR)
                     {
                         Write($"if(Clasificacion == Tipos.{nombre})", tabs);
                         Write("{", tabs);
                         Write($"match(Tipos.{nombre});", tabs + 1);
                         Write("}", tabs);
-                        match(Tipos.Optativo);
+
+                        if (Clasificacion == Tipos.OR)
+                        {
+                            match(Tipos.OR);
+                            if (Clasificacion == Tipos.SNT && existeFuncion(Contenido))
+                            {
+                                // Falta por agregar algunas cosas
+                                // Comprobar con ciclo el simbolo de una función (?)
+                                Write($"else", tabs);
+                                Write("{", tabs);
+                                Write($"{Contenido}();", tabs + 1);
+                                Write("}", tabs);
+                                nextToken();
+                            }
+                            else if (Clasificacion == Tipos.SNT && esClasificacion(Contenido))
+                            {
+                                Write($"else", tabs);
+                                Write("{", tabs);
+                                Write($"match(Tipos.{Contenido})", tabs + 1);
+                                Write("}", tabs);
+                                nextToken();
+                            }
+                            else if (Clasificacion == Tipos.ST)
+                            {
+                                Write($"else", tabs);
+                                Write("{", tabs);
+                                Write($"match(\"{Contenido}\");", tabs + 1);
+                                Write("}", tabs);
+                                nextToken();
+                            }
+                            else
+                            {
+                                throw new Error("No se ingresó una gramática válida", log, linea, columna);
+                            }
+                        }
+                        else
+                        {
+                            match(Tipos.Optativo);
+                        }
                     }
                     else
                     {
                         Write($"match(Tipos.{nombre});", tabs);
                     }
                 }
+                // En caso de venir un SNT pero una Función
                 else
                 {
                     string nombre = Contenido;
                     string? primerSimbolo = obtenerSimbolo(nombre);
-                    //char index = primerSimbolo![0];
+
+                    while (existeFuncion(primerSimbolo!))
+                    {
+                        primerSimbolo = obtenerSimbolo(primerSimbolo!);
+                    }
 
                     match(Tipos.SNT);
 
@@ -160,7 +204,6 @@ namespace Generador
                         if (existeFuncion(nombre))
                         {
                             Write(nombre + "();", tabs);
-                            Console.WriteLine($"Nombre {nombre}");
                         }
                         else
                         {
@@ -169,9 +212,11 @@ namespace Generador
                     }
                 }
             }
+            // En caso de venir un ST, o sea, un match de un Contenido
             else if (Clasificacion == Tipos.ST)
             {
                 string nombre = Contenido;
+
                 match(Tipos.ST);
 
                 if (Clasificacion == Tipos.Optativo)
