@@ -5,7 +5,7 @@
         del lado derecho de la producción existan. [DONE]
     3.  Agregar a la estructura el símbolo con el que inicia la producción. [DONE]
     4.  Implementar la cerradura Epsilon en agrupaciones. [%]
-    5.  Implementar el OR. [DONE]
+    5.  Implementar el OR. [DONE] 
 */
 
 using System;
@@ -85,7 +85,7 @@ namespace Generador
 
             if (existeFuncion(Contenido))
             {
-                throw new Error($"La función {Contenido} ya existe o ya fue declarada", log, linea, columna);
+                throw new Error($"La función {Contenido} ya fue agregada", log, linea, columna);
             }
 
             string function = Contenido;
@@ -127,7 +127,7 @@ namespace Generador
                         if (Clasificacion == Tipos.OR)
                         {
                             match(Tipos.OR);
-                            writeOr(Clasificacion, Contenido);
+                            writeOr(Clasificacion, Contenido, tabs);
                         }
                         else
                         {
@@ -143,7 +143,15 @@ namespace Generador
                 else
                 {
                     string nombre = Contenido;
-                    string? primerSimbolo = obtenerSimbolo(nombre);
+                    string? primerSimbolo;
+                    if (existeFuncion(nombre))
+                    {
+                        primerSimbolo = obtenerSimbolo(nombre);
+                    }
+                    else
+                    {
+                        throw new Error($"La función {nombre} no existe", log, linea, columna);
+                    }
 
                     while (existeFuncion(primerSimbolo!))
                     {
@@ -198,7 +206,7 @@ namespace Generador
                     if (Clasificacion == Tipos.OR)
                     {
                         match(Tipos.OR);
-                        writeOr(Clasificacion, Contenido);
+                        writeOr(Clasificacion, Contenido, tabs);
                     }
                     else
                     {
@@ -212,11 +220,54 @@ namespace Generador
             }
             else
             {
-                match(Tipos.InicioAgrupacion);
-                Write("{", tabs);
-                ListaSimbolos("", primeraVez, tabs + 1);
-                match(Tipos.CierreAgrupacion);
-                Write("}", tabs);
+                int inicioAgrupacion = contadorCaracteres - Contenido.Length;
+                int lineaInicioAgrupacion = Lexico.linea;
+                bool esOptativo = false;
+                bool esFinAgrupacion = false;
+
+                while (!esFinAgrupacion)
+                {
+                    nextToken();
+
+                    if (Contenido == "\\)")
+                    {
+                        nextToken();
+                        
+                        if (Contenido == "\\?")
+                        {
+                            esOptativo = true;
+                            esFinAgrupacion = true;
+                        }
+                        else
+                        {
+                            esFinAgrupacion = true;
+                        }
+                    }
+                }
+
+                setPosicion(inicioAgrupacion, lineaInicioAgrupacion);
+
+                if (esOptativo)
+                {
+                    if (Clasificacion == Tipos.InicioAgrupacion)
+                    {
+                        match(Tipos.InicioAgrupacion);
+                        Write($"if(Clasificacion == Tipos.InicioAgrupacion)", tabs);
+                        Write("{", tabs);
+                        ListaSimbolos("", primeraVez, tabs + 1);
+                        match(Tipos.CierreAgrupacion);
+                        Write("}", tabs);
+                        match(Tipos.Optativo);
+                    }
+                }
+                else
+                {
+                    match(Tipos.InicioAgrupacion);
+                    Write("{", tabs);
+                    ListaSimbolos("", primeraVez, tabs + 1);
+                    match(Tipos.CierreAgrupacion);
+                    Write("}", tabs);
+                }
             }
 
             if (Clasificacion != Tipos.FinProduccion && Clasificacion != Tipos.CierreAgrupacion)
@@ -276,6 +327,14 @@ namespace Generador
             {
                 throw new Error("No se ingresó una gramática válida", log, linea, columna);
             }
+        }
+        private void setPosicion(int posicion, int linea)
+        {
+            archivo.DiscardBufferedData();
+            archivo.BaseStream.Seek(posicion, SeekOrigin.Begin);
+            contadorCaracteres = posicion;
+            Lexico.linea = linea;
+            nextToken();
         }
     }
 }
