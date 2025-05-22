@@ -21,6 +21,8 @@ namespace Generador
     public class Lenguaje : Sintaxis
     {
         Dictionary<string, string> functions = new Dictionary<string, string>();
+
+        private int contadorMatch;
         public Lenguaje(string nombre = "gram.txt") : base(nombre)
         {
         }
@@ -124,10 +126,46 @@ namespace Generador
                         Write($"match(Tipos.{nombre});", tabs + 1);
                         Write("}", tabs);
 
+                        int inicio = contadorCaracteres - Contenido.Length;
+                        int lineaInicio = Lexico.linea;
+                        int contadorOr = 0;
+
+                        while (Contenido != "\\;")
+                        {
+                            nextToken();
+                            if (Contenido == "\\|")
+                            {
+                                contadorOr++;
+                            }
+                        }
+
+                        setPosicion(inicio, lineaInicio);
+
                         if (Clasificacion == Tipos.OR)
                         {
-                            match(Tipos.OR);
-                            writeOr(Clasificacion, Contenido, tabs);
+                            Console.WriteLine($"ContadorOr en el If: {contadorOr}");
+                            if (contadorOr > 0)
+                            {
+                                while (Clasificacion == Tipos.OR)
+                                {
+                                    if (contadorMatch == contadorOr)
+                                    {
+                                        match(Tipos.OR);
+                                        writeOr(Clasificacion, Contenido, tabs, false);
+                                    }
+                                    else
+                                    {
+                                        match(Tipos.OR);
+                                        writeOr(Clasificacion, Contenido, tabs, true);
+                                    }
+                                    contadorMatch += 1;
+                                }
+                            }
+                            else
+                            {
+                                match(Tipos.OR);
+                                writeOr(Clasificacion, Contenido, tabs, false);
+                            }
                         }
                         else
                         {
@@ -144,6 +182,7 @@ namespace Generador
                 {
                     string nombre = Contenido;
                     string? primerSimbolo;
+
                     if (existeFuncion(nombre))
                     {
                         primerSimbolo = obtenerSimbolo(nombre);
@@ -160,21 +199,109 @@ namespace Generador
 
                     match(Tipos.SNT);
 
-                    if (Clasificacion == Tipos.Optativo && esClasificacion(primerSimbolo!))
+                    if (Clasificacion == Tipos.Optativo || Clasificacion == Tipos.OR && esClasificacion(primerSimbolo!))
                     {
                         Write($"if(Clasificacion == Tipos.{primerSimbolo})", tabs);
                         Write("{", tabs);
                         Write(nombre + "();", tabs + 1);
                         Write("}", tabs);
-                        match(Tipos.Optativo);
+                        int inicio = contadorCaracteres - Contenido.Length;
+                        int lineaInicio = Lexico.linea;
+                        int contadorOr = 0;
+
+                        while (Contenido != "\\;")
+                        {
+                            nextToken();
+                            if (Contenido == "\\|")
+                            {
+                                contadorOr++;
+                            }
+                        }
+
+                        setPosicion(inicio, lineaInicio);
+
+                        if (Clasificacion == Tipos.OR)
+                        {
+                            Console.WriteLine($"ContadorOr en el If: {contadorOr}");
+                            if (contadorOr > 0)
+                            {
+                                while (Clasificacion == Tipos.OR)
+                                {
+                                    if (contadorMatch == contadorOr)
+                                    {
+                                        match(Tipos.OR);
+                                        writeOr(Clasificacion, Contenido, tabs, false);
+                                    }
+                                    else
+                                    {
+                                        match(Tipos.OR);
+                                        writeOr(Clasificacion, Contenido, tabs, true);
+                                    }
+                                    contadorMatch += 1;
+                                }
+                            }
+                            else
+                            {
+                                match(Tipos.OR);
+                                writeOr(Clasificacion, Contenido, tabs, false);
+                            }
+                        }
+                        else
+                        {
+                            match(Tipos.Optativo);
+                        }
                     }
-                    else if (Clasificacion == Tipos.Optativo && !esClasificacion(primerSimbolo!))
+                    else if (Clasificacion == Tipos.Optativo || Clasificacion == Tipos.OR && !esClasificacion(primerSimbolo!))
                     {
                         Write($"if(Contenido == \"{primerSimbolo}\")", tabs);
                         Write("{", tabs);
                         Write(nombre + "();", tabs + 1);
                         Write("}", tabs);
-                        match(Tipos.Optativo);
+                        int inicio = contadorCaracteres - Contenido.Length;
+                        int lineaInicio = Lexico.linea;
+                        int contadorOr = 0;
+
+                        while (Contenido != "\\;")
+                        {
+                            nextToken();
+                            if (Contenido == "\\|")
+                            {
+                                contadorOr++;
+                            }
+                        }
+
+                        setPosicion(inicio, lineaInicio);
+
+                        if (Clasificacion == Tipos.OR)
+                        {
+                            Console.WriteLine($"ContadorOr en el If: {contadorOr}");
+                            if (contadorOr > 0)
+                            {
+                                while (Clasificacion == Tipos.OR)
+                                {
+                                    if (contadorMatch == contadorOr)
+                                    {
+                                        match(Tipos.OR);
+                                        writeOr(Clasificacion, Contenido, tabs, false);
+                                    }
+                                    else
+                                    {
+                                        match(Tipos.OR);
+                                        writeOr(Clasificacion, Contenido, tabs, true);
+                                    }
+                                    contadorMatch += 1;
+                                }
+                            }
+                            else
+                            {
+                                match(Tipos.OR);
+                                writeOr(Clasificacion, Contenido, tabs, false);
+                            }
+                        }
+                        else
+                        {
+                            match(Tipos.Optativo);
+                        }
                     }
                     else
                     {
@@ -203,10 +330,48 @@ namespace Generador
                     Write($"match(\"{nombre}\");", tabs + 1);
                     Write("}", tabs);
 
+                    int inicio = contadorCaracteres - Contenido.Length;
+                    int lineaInicio = Lexico.linea;
+                    int contadorOr = 0;
+
+                    while (Contenido != "\\;")
+                    {
+                        nextToken();
+                        if (Contenido == "\\|")
+                        {
+                            contadorOr++;
+                        }
+                    }
+
+                    Console.WriteLine($"ContadorOr antes de If: {contadorOr}");
+
+                    setPosicion(inicio, lineaInicio);
+
                     if (Clasificacion == Tipos.OR)
                     {
-                        match(Tipos.OR);
-                        writeOr(Clasificacion, Contenido, tabs);
+                        Console.WriteLine($"ContadorOr en el If: {contadorOr}");
+                        if (contadorOr > 0)
+                        {
+                            while (Clasificacion == Tipos.OR)
+                            {
+                                if (contadorMatch == contadorOr)
+                                {
+                                    match(Tipos.OR);
+                                    writeOr(Clasificacion, Contenido, tabs, false);
+                                }
+                                else
+                                {
+                                    match(Tipos.OR);
+                                    writeOr(Clasificacion, Contenido, tabs, true);
+                                }
+                                contadorMatch += 1;
+                            }
+                        }
+                        else
+                        {
+                            match(Tipos.OR);
+                            writeOr(Clasificacion, Contenido, tabs, false);
+                        }
                     }
                     else
                     {
@@ -222,6 +387,7 @@ namespace Generador
             {
                 int inicioAgrupacion = contadorCaracteres - Contenido.Length;
                 int lineaInicioAgrupacion = Lexico.linea;
+
                 bool esOptativo = false;
                 bool esFinAgrupacion = false;
 
@@ -232,7 +398,7 @@ namespace Generador
                     if (Contenido == "\\)")
                     {
                         nextToken();
-                        
+
                         if (Contenido == "\\?")
                         {
                             esOptativo = true;
@@ -295,13 +461,46 @@ namespace Generador
             }
             return null;
         }
-        private void writeOr(Tipos clasificacion, string Contenido, int tabs = 3)
+        private void writeOr(Tipos clasificacion, string Contenido, int tabs = 3, bool elseIf = false)
         {
+            string[] or = ["else", "else if"];
+            string nombre;
+
+            if (elseIf)
+            {
+                nombre = or[1];
+            }
+            else
+            {
+                nombre = or[0];
+            }
+
             if (clasificacion == Tipos.SNT && existeFuncion(Contenido))
             {
-                // Falta por agregar algunas cosas
-                // Comprobar con ciclo el simbolo de una función (?)
-                Write($"else", tabs);
+                string funcion = Contenido;
+                string? primerSimbolo = obtenerSimbolo(funcion);
+
+                while (existeFuncion(primerSimbolo!))
+                {
+                    primerSimbolo = obtenerSimbolo(primerSimbolo!);
+                }
+
+                if (elseIf)
+                {
+                    if (esClasificacion(primerSimbolo!))
+                    {
+                        Write($"{nombre}(Clasificacion == Tipos.{primerSimbolo})", tabs);
+                    }
+                    else
+                    {
+                        Write($"{nombre}(Contenido == \"{primerSimbolo}\")", tabs);
+                    }
+                }
+                else
+                {
+                    Write($"{nombre}", tabs);
+                }
+
                 Write("{", tabs);
                 Write($"{Contenido}();", tabs + 1);
                 Write("}", tabs);
@@ -309,7 +508,15 @@ namespace Generador
             }
             else if (clasificacion == Tipos.SNT && esClasificacion(Contenido))
             {
-                Write($"else", tabs);
+                if (elseIf)
+                {
+                    Write($"{nombre}(Clasificacion == Tipos.{Contenido})", tabs);
+                }
+                else
+                {
+                    Write($"{nombre}", tabs);
+                }
+
                 Write("{", tabs);
                 Write($"match(Tipos.{Contenido})", tabs + 1);
                 Write("}", tabs);
@@ -317,7 +524,15 @@ namespace Generador
             }
             else if (clasificacion == Tipos.ST)
             {
-                Write($"else", tabs);
+                if (elseIf)
+                {
+                    Write($"{nombre}(Contenido == \"{Contenido}\")", tabs);
+                }
+                else
+                {
+                    Write($"{nombre}", tabs);
+                }
+
                 Write("{", tabs);
                 Write($"match(\"{Contenido}\");", tabs + 1);
                 Write("}", tabs);
